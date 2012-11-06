@@ -1,0 +1,133 @@
+<?php
+
+/**
+ * @file
+ * ASR Forms module
+ */
+
+define('ASR_FORMS_THRESHOLD_MIN', variable_get('threshold_min', 0));
+define('ASR_FORMS_THRESHOLD_MAX',  variable_get('threshold_max', 100));
+define('ASR_FORMS_THRESHOLD_INTERVAL',  variable_get('threshold_interval', 10));
+
+define('ASR_FORMS_SEGMENT_MIN', variable_get('segment_length_min', 1));
+define('ASR_FORMS_SEGMENT_MAX',  variable_get('segment_length_max', 10));
+define('ASR_FORMS_SEGMENT_INTERVAL',  variable_get('segment_length_interval', 1));
+
+//define('SUBDOMAIN_SYSTEM_FILE_PATH_BLACKLIST_DEFAULT',   "*.js\n*/image_captcha/*");
+//define('SUBDOMAIN_SYSTEM_FILE_PATH_WHITELIST_DEFAULT',   "misc/*.js\nmodules/*.js");
+//define('SUBDOMAIN_SYSTEM_DRUPAL_PATH_BLACKLIST_DEFAULT', '');
+//define('SUBDOMAIN_SYSTEM_AUTH_USERS_BLACKLIST_DEFAULT',  '');
+
+/**
+ * Implementation of hook_init().
+ */
+/*function asr_forms_init() {
+}*/
+
+/**
+ * Implementation of hook_perm().
+ */
+/*function asr_forms_permission() {
+  return array(
+    'create asr forms' => array(
+      'title' => t('Edit ASR Forms'),
+      'description' => t('View/Edit/Submit ASR Forms'),
+    ),
+ );
+}*/
+
+/**
+ * Implementation of hook_menu().
+ */
+function asr_forms_menu() {
+  $items = array();
+  
+  $items['admin/config/system/asr_forms'] = array(
+  //	'type' => MENU_CALLBACK,
+  	'title' => 'ASR Forms Settings',
+  	'description' => 'Configure ASR Forms settings.',
+  	'page callback' => 'drupal_get_form',
+  	'page arguments' => array('asr_forms_admin_settings_form'),
+  	'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+  	'file' => 'asr_forms.admin.inc',
+  	'weight' => 100,
+  );
+  
+  $items['asr_forms/sequence_alignement'] = array(
+    'type' => MENU_CALLBACK,
+    //'page callback' => 'test',
+  	'page callback' => 'drupal_get_form',
+  	'page arguments' => array('asr_forms_sequence_alignement_form'),
+    'access callback' => TRUE,
+  );
+  
+ /* $items['asr_forms/history'] = $base + array(
+  	'type' => MENU_CALLBACK,
+  	'page callback' => '_asr_forms_history',
+  	'access callback' => TRUE,
+  );*/
+    
+  return $items;
+}
+
+function asr_forms_sequence_alignement_form($form, &$form_state) {
+
+	$form['asr_alignement'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Ancient standard repeats detection in DNA sequence'),
+			'#description' => t('text here'),
+	);
+
+	$form['asr_alignement']['algnement_name'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Alignement Name'),
+			'#description' => t('Enter Alignement Name'),
+	);
+	
+	$form['asr_alignement']['alignement_file'] = array(
+			'#type' => 'file',
+			'#title' => t('File Path'),
+			'#description' => t('Upload DNA sequence for alignement in FASTA format'),
+	);
+	
+	$form['asr_alignement']['alignement_standard_repeats'] = array(
+			'#type' => 'select',
+			'#options' => array("please select"),
+			'#title' => t('Standard Repeats'),
+			'#description' => t('You can choose one or more standard repeats.'),
+	);
+	
+	$form['asr_alignement']['alignement_segment_length'] = array(
+			'#type' => 'select',
+			'#options' => build_select_arr(ASR_FORMS_SEGMENT_MIN, ASR_FORMS_SEGMENT_MAX, ASR_FORMS_SEGMENT_INTERVAL),
+			'#title' => t('Segment Length'),
+			'#description' => t('Select slice length you want to use for your sequence alignement.'),
+	);
+	
+	$form['asr_alignement']['alignement_threshold'] = array(
+			'#type' => 'select',
+			'#options' => build_select_arr(ASR_FORMS_THRESHOLD_MIN, ASR_FORMS_THRESHOLD_MAX, ASR_FORMS_THRESHOLD_INTERVAL),
+			'#title' => t('Alignement Threshold'),
+			'#description' => t('Select threshold value for sequence alignement.'),
+	);
+	
+	$form['asr_alignement']['submit'] = array(
+			'#type' => 'button',
+			'#value' => t('Align sequence'),
+	);
+	
+	return $form;
+}
+
+function build_select_arr($min, $max, $interval) {
+	$curr = $min;
+	$select_arr = Array();
+	if($min < $max) {
+		while($curr <= $max) {
+			$select_arr[$curr] = $curr;
+			$curr = $curr + $interval;
+		}
+	}
+	return $select_arr;
+}
