@@ -1,0 +1,8 @@
+name = ASR API
+description = Module with API functions for ancient standard repeats detection in DNA sequence
+package = ASR project
+core = 7.x
+
+files[] = asr_api.module
+files[] = asr_api.admin.inc
+configure = admin/config/system/asr_api

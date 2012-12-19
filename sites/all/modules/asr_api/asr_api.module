@@ -1,0 +1,332 @@
+<?php
+
+/**
+ * @file
+ * ASR Forms module
+ */
+
+// define('ASR_FORMS_THRESHOLD_MIN', variable_get('threshold_min', 0));
+// define('ASR_FORMS_THRESHOLD_MAX',  variable_get('threshold_max', 100));
+// define('ASR_FORMS_THRESHOLD_INTERVAL',  variable_get('threshold_interval', 10));
+
+// define('ASR_FORMS_SEGMENT_MIN', variable_get('segment_length_min', 1));
+// define('ASR_FORMS_SEGMENT_MAX',  variable_get('segment_length_max', 10));
+// define('ASR_FORMS_SEGMENT_INTERVAL',  variable_get('segment_length_interval', 1));
+
+//define('SUBDOMAIN_SYSTEM_FILE_PATH_BLACKLIST_DEFAULT',   "*.js\n*/image_captcha/*");
+//define('SUBDOMAIN_SYSTEM_FILE_PATH_WHITELIST_DEFAULT',   "misc/*.js\nmodules/*.js");
+//define('SUBDOMAIN_SYSTEM_DRUPAL_PATH_BLACKLIST_DEFAULT', '');
+//define('SUBDOMAIN_SYSTEM_AUTH_USERS_BLACKLIST_DEFAULT',  '');
+
+define('DEBUG_MODE_WATCHDOG', 1);
+
+/**
+ * Implementation of hook_init().
+ */
+/*function asr_forms_init() {
+}*/
+
+/**
+ * Implementation of hook_perm().
+ */
+/*function asr_forms_permission() {
+  return array(
+    'create asr forms' => array(
+      'title' => t('Edit ASR Forms'),
+      'description' => t('View/Edit/Submit ASR Forms'),
+    ),
+ );
+}*/
+
+/**
+ * Implementation of hook_menu().
+ */
+function asr_api_menu() {
+  $items = array();
+  
+  $items['admin/config/system/asr_api'] = array(
+  //	'type' => MENU_CALLBACK,
+  	'title' => 'API Settings',
+  	'description' => 'Configure ASR API settings.',
+  	'page callback' => 'drupal_get_form',
+  	'page arguments' => array('asr_api_admin_settings_form'),
+  	'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+  	'file' => 'asr_api.admin.inc',
+  	'weight' => 100,
+  );
+  
+  $items['asr_api/GetOrganismList'] = array(
+    'type' => MENU_CALLBACK,
+  	'page callback' => 'GetOrganismList',
+  	'page arguments' => array(),
+    'access callback' => TRUE,
+  );
+  $items['asr_api/GetRetrotransposonsList'] = array(
+  		'type' => MENU_CALLBACK,
+  		'page callback' => 'GetRetrotransposonsList',
+  		'page arguments' => array(),
+  		'access callback' => TRUE,
+  );
+  $items['asr_api/GetRetrotransposonsPortionList'] = array(
+  		'type' => MENU_CALLBACK,
+  		'page callback' => 'GetRetrotransposonsPortionList',
+  		'page arguments' => array(),
+  		'access callback' => TRUE,
+  );
+  
+ /* $items['asr_forms/history'] = $base + array(
+  	'type' => MENU_CALLBACK,
+  	'page callback' => '_asr_forms_history',
+  	'access callback' => TRUE,
+  );*/
+    
+  return $items;
+}
+
+/**
+ *
+ * @param string $method
+ * @param array $params
+ */
+function asr_api_service_call($method, $params=array(), $cache=false){
+
+	$options = array();
+	$options['exceptions']  = false;
+	$options['encoding']  = 'utf-8';
+	$options['soap_version'] = SOAP_1_1;
+	$options['cache_wsdl'] = WSDL_CACHE_NONE;
+
+	$wsdl = 'http://assr.uhurucloud.com/ASRServices.svc?wsdl';
+	//$wsdl = 'http://assr.uhurucloud.com/TestWebServices.asmx?wsdl';
+	//$wsdl = 'http://ws.cdyne.com/psaddress/addresslookup.asmx?wsdl';
+	//$wsdl=$WD.($cache ? '' : '&k='.uniqid() );
+
+	try {
+		$client = new SoapClient($wsdl, $options);		
+	}catch (Exception $e) {
+		throw $e->getMessage();
+	}
+
+	$params = array($method => $params);
+
+	try {
+		$response=$client->__soapCall($method, $params);
+		//$response = var_dump($client->__getLastRequest());
+	}catch (Exception $e){
+		/*watchdog('spiral_ziccu_api', 'Exception throwen in %file, line: %line. Message: %message. Trace: %trace. WebRefId : %webRefId.', array(
+		'%file' => $e->getFile(),
+		'%line' => $e->getLine(),
+		'%message' => $e->getMessage(),
+		'%trace' => $e->getTrace(),
+		'%webRefId' => rand(10000000, 99999999),
+		)
+		);*/
+		//echo("<pre>"); //to format it legibly on your screen
+		//var_dump($client->__getLastRequestHeaders()); //the headers of your last request
+		//$response = var_dump($client->__getLastRequest()); //your last request
+		$response = array('ErrorCode' => 201); // ErrorCode 201 is web general error (error.js)
+		_output_json_response($response);
+		exit();
+	}
+
+	//if(DEBUG_MODE_EMAIL==1 && DEBUG_MAIL!='')
+		//mail(DEBUG_MAIL, $method, 'Request: '.print_r($params,1).' Response: '.print_r($response,1));
+	if(DEBUG_MODE_WATCHDOG==1)
+		watchdog('DEBUG', '<pre>Request: '.print_r($params,1).' <br />Response: '.print_r($response,1));
+	return $response;
+}
+
+/**
+ *
+ * @param array $out
+ */
+function _output_json_response($out, $callbackError='') {
+
+	header('Content-type:application/x-javascript');
+	if(isset($_GET['callback'])){
+		if($callbackError != '' ){
+			$callback=$callbackError;
+		}else{
+			$callback = (isset($_GET['callback']) && preg_match('/^[0-9a-zA-Z\-_]{1,50}$/', $_GET['callback'])) ? $_GET['callback'] : '';
+		}
+		$str= $callback . '(' . drupal_to_js($out) . ');';
+	}else{
+		$str= drupal_json_output($out);
+	}
+
+
+	if(isset($_GET["timetest"])){
+		$total_time = round((getTime() - TIME_START), 4);
+		echo 'Page generated in '.$total_time.' seconds.';
+	}else{
+		echo $str;
+	}
+
+	return;
+}
+
+/**
+ * End session and return user updated balance, update expiration for jackpotTicket
+ * (balance will be displayed as divided by 100)
+ * @param  string $gameCode
+ * @param  int    $gameId
+ *
+ * @return int    $balance
+ * @return int    $weeklyWin
+ * @return int    $numOfSpins
+ */
+function GetOrganismList(){
+
+	$var_key = 'GetOrganismList';
+	
+	if(variable_get($var_key, null) != null) {
+		_output_json_response(variable_get($var_key, null));
+		return;
+	}
+	
+	$params = array();
+	
+	try {
+		$response = asr_api_service_call('GetOrganismList', $params);
+	}catch (Exception $e){
+		return $e;
+	}
+	//echo "<pre>";
+	//print_r($response);
+	//exit;
+	$out = $response->GetOrganismListResult;
+	if(isset($out->OrganismCollection->OrganismSkeleton))
+	{
+		$list = $out->OrganismCollection->OrganismSkeleton;
+		$out->list = is_array($list)?$list:array($list);
+		unset($out->OrganismCollection);
+	}
+	unset($response);
+	variable_set($var_key, $out);
+	_output_json_response($out);
+}
+/**
+ * End session and return user updated balance, update expiration for jackpotTicket
+ * (balance will be displayed as divided by 100)
+ * @param  string $gameCode
+ * @param  int    $gameId
+ *
+ * @return int    $balance
+ * @return int    $weeklyWin
+ * @return int    $numOfSpins
+ */
+function GetRetrotransposonsList(){
+	$OrganismId = strip_tags(isset($_POST["OrganismId"]) ? $_POST["OrganismId"] : 1);
+
+	$var_key = 'GetRetrotransposonsList_oid'.$OrganismId;
+	
+	if(variable_get($var_key, null) != null) {
+		_output_json_response(variable_get($var_key, null));
+		return;
+	}
+	
+	$params = array('input' => array('OrganismId' => $OrganismId));
+
+	try {
+		$response = asr_api_service_call('GetRetrotransposonsList', $params);
+	}catch (Exception $e){
+		return $e;
+	}
+	//echo "<pre>";
+	//print_r($response);
+	//exit;
+	$out = $response->GetRetrotransposonsListResult;
+
+	if(isset($out->RetrotransposonsSkeletonCollection->RetrotransposonsSkeleton))
+	{
+		$list = $out->RetrotransposonsSkeletonCollection->RetrotransposonsSkeleton;
+		$out->list = is_array($list)?$list:array($list);
+		unset($out->RetrotransposonsSkeletonCollection);
+	}
+	unset($response);
+	variable_set($var_key, $out);
+	_output_json_response($out);
+}
+/**
+ * End session and return user updated balance, update expiration for jackpotTicket
+ * (balance will be displayed as divided by 100)
+ * @param  string $gameCode
+ * @param  int    $gameId
+ *
+ * @return int    $balance
+ * @return int    $weeklyWin
+ * @return int    $numOfSpins
+ */
+function GetRetrotransposonsPortionList(){
+	$OrganismId = strip_tags(isset($_POST["OrganismId"]) ? $_POST["OrganismId"] : 1);
+	$RetrotransposonsId = strip_tags(isset($_POST["RetrotransposonsId"]) ? $_POST["RetrotransposonsId"] : 1);
+	
+	$var_key = 'GetRetrotransposonsPortionList_oid'.$OrganismId.'_rid'.$RetrotransposonsId;
+	
+	if(variable_get($var_key, null) != null) {
+		_output_json_response(variable_get($var_key, null));
+		return;
+	}
+	
+	$params = array('input' => array('OrganismId' => $OrganismId, 'RetrotransposonsId' => $RetrotransposonsId));
+
+	try {
+		$response = asr_api_service_call('GetRetrotransposonsPortionList', $params);
+	}catch (Exception $e){
+		return $e;
+	}
+	//echo "<pre>";
+	//print_r($response);
+	//exit;
+	$out = $response->GetRetrotransposonsPortionListResult;
+	if(isset($out->RetrotransposonsPortionSkeletonCollection->RetrotransposonsPortionSkeleton))
+	{
+		$list = $out->RetrotransposonsPortionSkeletonCollection->RetrotransposonsPortionSkeleton;
+		$out->list = is_array($list)?$list:array($list);
+		unset($out->RetrotransposonsPortionSkeletonCollection);
+	}
+	unset($response);
+	variable_set($var_key, $out);
+	_output_json_response($out);
+}
+/**
+ * End session and return user updated balance, update expiration for jackpotTicket
+ * (balance will be displayed as divided by 100)
+ * @param  string $gameCode
+ * @param  int    $gameId
+ *
+ * @return int    $balance
+ * @return int    $weeklyWin
+ * @return int    $numOfSpins
+ */
+function DoASRAlign($alignement_string, $form_values) {
+	$OrganismId = $form_values['alignement_organisms'];
+	$RetrotransposonsId = $form_values['alignement_retrotransposons'];
+ 	$RetrotransposonsPortionList = '1,2';//$form_values['alignement_retrotransposons_portion']
+	$NewSequence = $alignement_string;
+	$WordLength = $form_values['alignement_segment_length'];
+	$WordMatchPercentage = $form_values['alignement_threshold']/100;
+	$GapExtensionCost = -2;
+	$GapOpenCost = -1;
+	
+	$params =array('input' => array('NewSequence' => $NewSequence,
+			'OrganismId' => $OrganismId,
+			'RetrotransposonsId' => $RetrotransposonsId,
+			'OrganismRetrotransposonsDelimitedList' => $RetrotransposonsPortionList,
+			'LocalAlignmentGapCost' => array('GapExtensionCost' => $GapExtensionCost, 'GapOpenCost' => $GapOpenCost),
+			'WordLength' => $WordLength,
+			'WordMatchPercentage' => $WordMatchPercentage));
+	try {
+		$response = asr_api_service_call('DoASRAlignAlternate', $params);
+	}catch (Exception $e){
+		return $e;
+	}
+	//echo "<pre>";
+	//print_r($response);
+	//exit;
+	$out = $response->DoASRAlignAlternateResult;
+	unset($response);
+	return $out;
+	//_output_json_response($out);
+}
