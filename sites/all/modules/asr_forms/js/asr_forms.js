@@ -66,7 +66,7 @@
 
 jQuery(document).ready(function() {
 	ASR_Forms.GetOrganismList();
-	jQuery("#edit-alignement-organisms").change(function() { ASR_Forms.GetRetrotransposonsList(jQuery(this).val());  alert('you selected ' + jQuery(this).val()); });
-	jQuery("#edit-alignement-retrotransposons").change(function() { ASR_Forms.GetRetrotransposonsPortionList(jQuery("#edit-alignement-organisms").val(), jQuery(this).val());  alert('you selected ' + jQuery(this).val()); });
+	jQuery("#edit-alignement-organisms").change(function() { ASR_Forms.GetRetrotransposonsList(jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
+	jQuery("#edit-alignement-retrotransposons").change(function() { ASR_Forms.GetRetrotransposonsPortionList(jQuery("#edit-alignement-organisms").val(), jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
 //$('.submit_algorithm').bind('click', function() {$.GF_SubmitForm('real');}); 
 });

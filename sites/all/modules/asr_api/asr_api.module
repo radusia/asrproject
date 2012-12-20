@@ -114,14 +114,14 @@ function asr_api_service_call($method, $params=array(), $cache=false){
 		$response=$client->__soapCall($method, $params);
 		//$response = var_dump($client->__getLastRequest());
 	}catch (Exception $e){
-		/*watchdog('spiral_ziccu_api', 'Exception throwen in %file, line: %line. Message: %message. Trace: %trace. WebRefId : %webRefId.', array(
+		watchdog('asr_api', 'Exception throwen in %file, line: %line. Message: %message. Trace: %trace. WebRefId : %webRefId.', array(
 		'%file' => $e->getFile(),
 		'%line' => $e->getLine(),
 		'%message' => $e->getMessage(),
 		'%trace' => $e->getTrace(),
 		'%webRefId' => rand(10000000, 99999999),
 		)
-		);*/
+		);
 		//echo("<pre>"); //to format it legibly on your screen
 		//var_dump($client->__getLastRequestHeaders()); //the headers of your last request
 		//$response = var_dump($client->__getLastRequest()); //your last request
@@ -303,7 +303,7 @@ function GetRetrotransposonsPortionList(){
 function DoASRAlign($alignement_string, $form_values) {
 	$OrganismId = $form_values['alignement_organisms'];
 	$RetrotransposonsId = $form_values['alignement_retrotransposons'];
- 	$RetrotransposonsPortionList = '1,2';//$form_values['alignement_retrotransposons_portion']
+ 	$RetrotransposonsPortionList = implode(",", $form_values['alignement_retrotransposons_portion']);
 	$NewSequence = $alignement_string;
 	$WordLength = $form_values['alignement_segment_length'];
 	$WordMatchPercentage = $form_values['alignement_threshold']/100;

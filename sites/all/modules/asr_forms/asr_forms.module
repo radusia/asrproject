@@ -53,13 +53,12 @@ function asr_forms_menu() {
   );
   
   $items['asr_forms/sequence_alignement'] = array(
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_LOCAL_TASK,
     'title' => 'ASR Alignement',
-  		'description' => 'Configure ASR Forms settings.',
+  	'description' => 'ASR Alignement Forms.',
   	'page callback' => 'drupal_get_form',
   	'page arguments' => array('asr_forms_sequence_alignement_form'),
-  	'access callback' => 'user_access',
-    'access callback' => TRUE,
+  	//'access callback' => 'user_access',
   );
   
  /* $items['asr_forms/history'] = $base + array(
@@ -71,8 +70,10 @@ function asr_forms_menu() {
   return $items;
 }
 
-function asr_forms_sequence_alignement_form($form, &$form_state) {
+function asr_forms_sequence_alignement_form($form, &$form_state) {	
 	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
+	//drupal_add_js('misc/form.js');
+	drupal_add_js('misc/collapse.js');
 	$form['asr_alignement'] = array(
 			'#type' => 'fieldset',
 			'#title' => t('Ancient standard repeats detection in DNA sequence'),
@@ -191,7 +192,7 @@ function asr_forms_submit_driven_callback($form, $form_state) {
 			$form_state['redirect'] = '';
 			return;*/
 			//echo "<pre>";
-			//print_r(file_get_contents($_FILES['files']['tmp_name']['alignement_file']));
+			//print(implode(",", $form_state['values']['alignement_retrotransposons_portion']));
 			//exit;
 $messages = drupal_get_messages();
 $element = $form['asr_alignement']['box'];
@@ -204,12 +205,102 @@ $element = $form['asr_alignement']['box'];
 	}
 	else { // submit alignement algorithms
 		$result = DoASRAlign(file_get_contents($_FILES['files']['tmp_name']['alignement_file']), $form_state['values']);
-		$element['#markup'] = "<pre>Clicked submit ({$form_state['values']['op']}): " . date('c'). print_r($result, 1);
-		
+		if(isset($result->Error) && $result->Error == 'NoError') {
+			//$element['#markup'] = "<pre>Clicked submit ({$form_state['values']['op']}): " . date('c'). print_r($result, 1);
+			$element['#markup'] = asr_forms_alignement_result($result);
+		}
+		else {
+			$element['#markup'] = '<div class="messages error">
+								<h2 class="element-invisible">Error message</h2>General error. Ref #: '.(isset($result->RefNumber)?$result->RefNumber:'NA').'
+						       </div>';		
+		}		
 	}
 	$element['#prefix'] = '<div id="box">';
 	$element['#suffix'] = '</div>';
 	return $element;
+}
+
+function asr_forms_alignement_result($result) {
+	$out = ''; 
+	$collapsed = true;
+	if(isset($result->ASRAlignResult->RetrotransposonsPortionAlignResult)) {
+		$list = $result->ASRAlignResult->RetrotransposonsPortionAlignResult;
+		$list = is_array($list)?$list:array($list);
+		foreach ($list as $value) {
+//			$out .= '<pre>'.print_r($value,1);
+// 			$value->ExactMatchAlignResult->NumWords;
+// 			$value->ExactMatchAlignResult->SuccessMatchPercentage;
+// 			$value->AlignWordStatus; //AlignOk
+// 			$value->LoaclAlignmentResult->AlignedASRSequence;
+// 			$value->LoaclAlignmentResult->AlignedGeneSequence;
+// 			$value->LoaclAlignmentResult->GeneSequenceLength;
+// 			$value->LoaclAlignmentResult->GeneSequenceStartOffset;
+// 			$value->LoaclAlignmentResult->Score;
+// 			$value->RetrotransposonsPortion->Name;
+// 			$value->RetrotransposonsPortion->Repeat;
+			//echo "<pre>";
+			//print_r($value,1);
+			//return;
+ 			$out .= asr_forms_wrap_result($value, $collapsed);
+ 			$collapsed = false;
+		}
+	}
+	return $out;
+}
+
+function asr_forms_wrap_result($value, $collapsed = false) {	
+	$LoaclAlignmentResult_table = $ExactMatchAlignResult_table = '';
+	
+	$header = $header1 = array();
+	$rows = $rows1 = array();
+
+	$header = array(
+			array('data' => t('Number of Words')),
+			array('data' => t('Success Match Percentage')),);
+	$rows [] = array(  
+		array('data' => $value->ExactMatchAlignResult->NumWords),   
+		array('data' => ($value->ExactMatchAlignResult->SuccessMatchPercentage*100).'%'),
+	);
+	$ExactMatchAlignResult_table = theme('table', array('header' => $header, 'rows' => $rows));
+	
+	
+	if(!empty($value->LoaclAlignmentResult)) {
+		$header1 = array(
+				array('data' => t('Loacl Alignment Result'), 'colspan' => 2)
+		);
+		
+		$rows1 [] = array(
+				array('data' => t('Gene Sequence Length')),
+				array('data' => $value->LoaclAlignmentResult->GeneSequenceLength),
+		);
+		$rows1 [] = array(
+				array('data' => t('GeneSequenceStartOffset')),
+				array('data' => $value->LoaclAlignmentResult->GeneSequenceStartOffset),
+		);
+		
+		$rows1 [] = array(
+			array('data' => t('Aligned ASR Sequence')),
+			array('data' => $value->LoaclAlignmentResult->AlignedASRSequence),
+		);
+		
+		$rows1 [] = array(
+				array('data' => t('Aligned Gene Sequence')),
+				array('data' => $value->LoaclAlignmentResult->AlignedGeneSequence),
+		);
+		$LoaclAlignmentResult_table = theme('table', array('header' => $header1, 'rows' => $rows1));
+		
+	}
+	
+	$title_class = ($value->AlignWordStatus == 'AlignOk')?'txt_green':'txt_red'; 
+	
+	$current_fieldset = array(
+			'#title' => '<span class="'.$title_class.'">'.$value->RetrotransposonsPortion->Name.'</span>',
+			'#collapsible' => true,
+			'#collapsed' => $collapsed,
+			'#attributes'  => array( 'class' => (!$collapsed ? array('collapsible', 'collapsed'):array('collapsible')) ),
+			'#children' => 'Repeat: '.$value->RetrotransposonsPortion->Repeat,
+			'#value' => $ExactMatchAlignResult_table. $LoaclAlignmentResult_table);
+	return theme('fieldset', array('element' => $current_fieldset));
 }
 
 function build_select_arr($min, $max, $interval) {

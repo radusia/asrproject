@@ -10,3 +10,11 @@
 .form-item-alignement-retrotransposons-portion {
 	display: none;
 }
+.txt_red {
+	color: red;
+	font-weight: bold;
+}
+.txt_green {
+	color: green;
+	font-weight: bold;
+}
