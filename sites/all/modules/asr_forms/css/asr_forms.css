@@ -10,6 +10,12 @@
 .form-item-alignement-retrotransposons-portion {
 	display: none;
 }
+#edit-algnement-name, #edit-alignement-organisms, #edit-alignement-retrotransposons, #edit-alignement-retrotransposons-portion {
+	width: 300px;
+}
+#edit-alignement-segment-length, #edit-alignement-threshold {
+	width: 60px;
+}
 .txt_red {
 	color: red;
 	font-weight: bold;

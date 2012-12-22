@@ -32,7 +32,7 @@
   
   ASR_Forms.InitSelectField = function(ElementName) {
 	  jQuery('.form-item-alignement-'+ElementName).hide();
-	  jQuery("#edit-alignement-"+ElementName).html('<option>-Select-</option>');
+	  jQuery("#edit-alignement-"+ElementName).html('<option value="">-Select-</option>');
   };
   
   ASR_Forms.callAjax = function(Method, DataObject, ElementName) {

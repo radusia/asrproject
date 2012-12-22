@@ -61,24 +61,23 @@ function asr_forms_menu() {
   	'access callback' => 'user_access',
   	'access arguments' => array('edit asr forms')
   );
-  
- /* $items['asr_forms/history'] = $base + array(
-  	'type' => MENU_CALLBACK,
-  	'page callback' => '_asr_forms_history',
-  	'access callback' => TRUE,
-  );*/
     
   return $items;
 }
 
 function asr_forms_sequence_alignement_form($form, &$form_state) {	
 	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
-	//drupal_add_js('misc/form.js');
 	drupal_add_js('misc/collapse.js');
 	$form['asr_alignement'] = array(
 			'#type' => 'fieldset',
 			'#title' => t('Ancient standard repeats detection in DNA sequence'),
-			'#description' => t('text here'),
+			'#description' => t('Add information about algorithm here'),
+	);
+	
+	$form['asr_alignement']['error'] = array(
+			'#type' => 'markup',
+			'#prefix' => '<div class="asr_forms_error">',
+			'#suffix' => '</div>',
 	);
 	
 	$form['asr_alignement']['algnement_name'] = array(
@@ -91,7 +90,7 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 	$form['asr_alignement']['alignement_file'] = array(
 			'#type' => 'file',
 			'#title' => t('File Path'),
-			'#size' => 50,
+			'#size' => 60,
 			'#description' => t('Upload DNA sequence for alignement in <a href="" target="_blank">correct format</a>.'),
 			'#required' => TRUE,
 	);
@@ -166,19 +165,19 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 function asr_forms_sequence_alignement_form_validate($form, $form_state) {
 	$error = "";
 	if(empty($form_state['values']['algnement_name'])) {
-		$error = t('Please specify name for alignement');
+		$error = array('error' => t('Please specify name for alignement'), 'field' => 'algnement-name');
 	}
 	else if(empty($_FILES['files']['tmp_name']['alignement_file'])) {
-		$error = t('Please upload file for alignement');
+		$error = array('error' => t('Please upload file for alignement'), 'field' => 'alignement-file');
 	}
 	else if(empty($form_state['values']['alignement_organisms'])) {
-		$error = t('Please select organism for alignement');
+		$error = array('error' => t('Please select organism for alignement'), 'field' => 'alignement-organisms');
 	}
 	else if(empty($form_state['values']['alignement_retrotransposons'])) {
-		$error = t('Please select retrotransposon for alignement');
+		$error = array('error' => t('Please select retrotransposon for alignement'), 'field' => 'alignement-retrotransposons');
 	}
 	else if(empty($form_state['values']['alignement_retrotransposons_portion'])) {
-		$error = t('Please select at least one retrotransposons portion for alignement');
+		$error = array('error' => t('Please select at least one retrotransposons portion for alignement'), 'field' => 'alignement-retrotransposons-portion');
 	}
 	return $error;
 }
@@ -200,25 +199,40 @@ $element = $form['asr_alignement']['box'];
 //$element['#markup'] = '';
 	$error = asr_forms_sequence_alignement_form_validate($form, $form_state);
 	if(!empty($error)) {		
-		$element['#markup'] = '<div class="messages error">
-								<h2 class="element-invisible">Error message</h2>'.$error.'
-						       </div>';
+		$element['#markup'] = asr_forms_error_script($error['error'], $error['field']);
 	}
 	else { // submit alignement algorithms
 		$result = DoASRAlign(file_get_contents($_FILES['files']['tmp_name']['alignement_file']), $form_state['values']);
 		if(isset($result->Error) && $result->Error == 'NoError') {
 			//$element['#markup'] = "<pre>Clicked submit ({$form_state['values']['op']}): " . date('c'). print_r($result, 1);
-			$element['#markup'] = asr_forms_alignement_result($result);
+			$element['#markup'] = asr_forms_error_script().asr_forms_alignement_result($result);
 		}
 		else {
-			$element['#markup'] = '<div class="messages error">
-								<h2 class="element-invisible">Error message</h2>General error. Ref #: '.(isset($result->RefNumber)?$result->RefNumber:'NA').'
-						       </div>';		
+			$element['#markup'] = asr_forms_error_script('General error. Ref #: '.(isset($result->RefNumber)?$result->RefNumber:'NA'));		
 		}		
 	}
 	$element['#prefix'] = '<div id="box">';
 	$element['#suffix'] = '</div>';
 	return $element;
+}
+
+function asr_forms_error_script($error = '', $field = '') {
+	if(!empty($error)) {
+		$script = '<script type="text/javascript">
+				jQuery(\'input\').removeClass(\'error\'); 
+				jQuery(\'select\').removeClass(\'error\'); 
+				'.(!empty($field)? 'jQuery(\'#edit-'.$field.'\').addClass(\'error\');':'').'
+				jQuery(\'.asr_forms_error\').html(\'<div class="messages error">'.$error.'</div>\'); 
+				</script>';
+	}
+	else {
+		$script = '<script type="text/javascript">
+				jQuery(\'input\').removeClass(\'error\');
+				jQuery(\'select\').removeClass(\'error\');
+				jQuery(\'.asr_forms_error\').html(\'\');
+				</script>';
+	}
+	return $script;
 }
 
 function asr_forms_alignement_result($result) {
