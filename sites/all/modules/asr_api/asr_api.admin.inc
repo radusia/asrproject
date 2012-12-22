@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * API - admin settings form
+ * Implementation of hook_form().
+ */
 function asr_api_admin_settings_form($form, &$form_state) {
  	$form['wsdl_settings'] = array(
     	'#type' => 'fieldset',

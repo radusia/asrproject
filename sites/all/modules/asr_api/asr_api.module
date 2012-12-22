@@ -2,24 +2,12 @@
 
 /**
  * @file
- * ASR Forms module
+ * ASR API module
  */
-
-// define('ASR_FORMS_THRESHOLD_MIN', variable_get('threshold_min', 0));
-// define('ASR_FORMS_THRESHOLD_MAX',  variable_get('threshold_max', 100));
-// define('ASR_FORMS_THRESHOLD_INTERVAL',  variable_get('threshold_interval', 10));
-
-// define('ASR_FORMS_SEGMENT_MIN', variable_get('segment_length_min', 1));
-// define('ASR_FORMS_SEGMENT_MAX',  variable_get('segment_length_max', 10));
-// define('ASR_FORMS_SEGMENT_INTERVAL',  variable_get('segment_length_interval', 1));
-
-//define('SUBDOMAIN_SYSTEM_FILE_PATH_BLACKLIST_DEFAULT',   "*.js\n*/image_captcha/*");
-//define('SUBDOMAIN_SYSTEM_FILE_PATH_WHITELIST_DEFAULT',   "misc/*.js\nmodules/*.js");
-//define('SUBDOMAIN_SYSTEM_DRUPAL_PATH_BLACKLIST_DEFAULT', '');
-//define('SUBDOMAIN_SYSTEM_AUTH_USERS_BLACKLIST_DEFAULT',  '');
-
 define('DEBUG_MODE_WATCHDOG', 1);
 
+define('DEBUG_MAIL', 'radusia@gmail.com');
+define('DEBUG_MODE_EMAIL', 0);
 /**
  * Implementation of hook_init().
  */
@@ -74,17 +62,12 @@ function asr_api_menu() {
   		'page arguments' => array(),
   		'access callback' => TRUE,
   );
-  
- /* $items['asr_forms/history'] = $base + array(
-  	'type' => MENU_CALLBACK,
-  	'page callback' => '_asr_forms_history',
-  	'access callback' => TRUE,
-  );*/
     
   return $items;
 }
 
 /**
+ * Send request to WSDL API by using  SoapClient and return parsed respnse
  *
  * @param string $method
  * @param array $params
@@ -130,14 +113,15 @@ function asr_api_service_call($method, $params=array(), $cache=false){
 		exit();
 	}
 
-	//if(DEBUG_MODE_EMAIL==1 && DEBUG_MAIL!='')
-		//mail(DEBUG_MAIL, $method, 'Request: '.print_r($params,1).' Response: '.print_r($response,1));
+	if(DEBUG_MODE_EMAIL==1 && DEBUG_MAIL!='')
+		mail(DEBUG_MAIL, $method, 'Request: '.print_r($params,1).' Response: '.print_r($response,1));
 	if(DEBUG_MODE_WATCHDOG==1)
 		watchdog('DEBUG', '<pre>Request: '.print_r($params,1).' <br />Response: '.print_r($response,1));
 	return $response;
 }
 
 /**
+ * Resturn json response to client
  *
  * @param array $out
  */
@@ -167,14 +151,10 @@ function _output_json_response($out, $callbackError='') {
 }
 
 /**
- * End session and return user updated balance, update expiration for jackpotTicket
- * (balance will be displayed as divided by 100)
- * @param  string $gameCode
- * @param  int    $gameId
+ * Get Organism List - invoke method GetOrganismList
+ * @param  
  *
- * @return int    $balance
- * @return int    $weeklyWin
- * @return int    $numOfSpins
+ * @return $out - json response
  */
 function GetOrganismList(){
 
@@ -206,16 +186,13 @@ function GetOrganismList(){
 	variable_set($var_key, $out);
 	_output_json_response($out);
 }
+
 /**
- * End session and return user updated balance, update expiration for jackpotTicket
- * (balance will be displayed as divided by 100)
- * @param  string $gameCode
- * @param  int    $gameId
- *
- * @return int    $balance
- * @return int    $weeklyWin
- * @return int    $numOfSpins
- */
+* Get Retrotransposons List - invoke method GetRetrotransposonsList
+* @param
+*
+* @return $out - json response
+*/
 function GetRetrotransposonsList(){
 	$OrganismId = strip_tags(isset($_POST["OrganismId"]) ? $_POST["OrganismId"] : 1);
 
@@ -248,15 +225,12 @@ function GetRetrotransposonsList(){
 	variable_set($var_key, $out);
 	_output_json_response($out);
 }
+
 /**
- * End session and return user updated balance, update expiration for jackpotTicket
- * (balance will be displayed as divided by 100)
- * @param  string $gameCode
- * @param  int    $gameId
+ * Get Retrotransposons Portion List - invoke method GetRetrotransposonsPortionList
+ * @param
  *
- * @return int    $balance
- * @return int    $weeklyWin
- * @return int    $numOfSpins
+ * @return $out - json response
  */
 function GetRetrotransposonsPortionList(){
 	$OrganismId = strip_tags(isset($_POST["OrganismId"]) ? $_POST["OrganismId"] : 1);
@@ -290,15 +264,13 @@ function GetRetrotransposonsPortionList(){
 	variable_set($var_key, $out);
 	_output_json_response($out);
 }
+
 /**
- * End session and return user updated balance, update expiration for jackpotTicket
- * (balance will be displayed as divided by 100)
- * @param  string $gameCode
- * @param  int    $gameId
- *
- * @return int    $balance
- * @return int    $weeklyWin
- * @return int    $numOfSpins
+ * ASR Lignement - invoke method DoASRAlignAlternate
+ * @param string - $alignement_string
+ * @param array  - $form_values - input form values
+ * 
+ * @return object $out - alignement result
  */
 function DoASRAlign($alignement_string, $form_values) {
 	$OrganismId = $form_values['alignement_organisms'];
