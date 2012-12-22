@@ -137,7 +137,7 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#type' => 'select',
 			'#options' => build_select_arr(ASR_FORMS_THRESHOLD_MIN, ASR_FORMS_THRESHOLD_MAX, ASR_FORMS_THRESHOLD_INTERVAL),
 			'#title' => t('Alignement Threshold'),
-			'#description' => t('Select threshold value for sequence alignement.'),
+			'#description' => t('Select threshold value for sequence alignement (the value is in %).'),
 			'#required' => FALSE,
 	);
 

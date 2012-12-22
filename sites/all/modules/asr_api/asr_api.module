@@ -45,22 +45,25 @@ function asr_api_menu() {
   );
   
   $items['asr_api/GetOrganismList'] = array(
-    'type' => MENU_CALLBACK,
-  	'page callback' => 'GetOrganismList',
-  	'page arguments' => array(),
-    'access callback' => TRUE,
+    	'type' => MENU_CALLBACK,
+  		'page callback' => 'GetOrganismList',
+  		'page arguments' => array(),
+    	'access callback' => 'user_access',
+  		'access arguments' => array('edit asr forms')
   );
   $items['asr_api/GetRetrotransposonsList'] = array(
   		'type' => MENU_CALLBACK,
   		'page callback' => 'GetRetrotransposonsList',
   		'page arguments' => array(),
-  		'access callback' => TRUE,
+  		'access callback' => 'user_access',
+  	    'access arguments' => array('edit asr forms')
   );
   $items['asr_api/GetRetrotransposonsPortionList'] = array(
   		'type' => MENU_CALLBACK,
   		'page callback' => 'GetRetrotransposonsPortionList',
   		'page arguments' => array(),
-  		'access callback' => TRUE,
+  		'access callback' => 'user_access',
+  	    'access arguments' => array('edit asr forms')
   );
     
   return $items;
@@ -297,6 +300,9 @@ function DoASRAlign($alignement_string, $form_values) {
 	//echo "<pre>";
 	//print_r($response);
 	//exit;
+	
+	//@todo - in case module asr_archive is switched on, save $out in asr archive for current userid
+	
 	$out = $response->DoASRAlignAlternateResult;
 	unset($response);
 	return $out;
