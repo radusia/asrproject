@@ -24,14 +24,14 @@ function asr_forms_init() {
 /**
  * Implementation of hook_perm().
  */
-/*function asr_forms_permission() {
+function asr_forms_permission() {
   return array(
-    'create asr forms' => array(
+    'edit asr forms' => array(
       'title' => t('Edit ASR Forms'),
       'description' => t('View/Edit/Submit ASR Forms'),
     ),
  );
-}*/
+}
 
 /**
  * Implementation of hook_menu().
@@ -41,7 +41,7 @@ function asr_forms_menu() {
   $items = array();
   
   $items['admin/config/system/asr_forms'] = array(
-  //	'type' => MENU_CALLBACK,
+  //'type' => MENU_CALLBACK,
   	'title' => 'ASR Forms Settings',
   	'description' => 'Configure ASR Forms settings.',
   	'page callback' => 'drupal_get_form',
@@ -53,12 +53,13 @@ function asr_forms_menu() {
   );
   
   $items['asr_forms/sequence_alignement'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'ASR Alignement',
   	'description' => 'ASR Alignement Forms.',
   	'page callback' => 'drupal_get_form',
   	'page arguments' => array('asr_forms_sequence_alignement_form'),
-  	//'access callback' => 'user_access',
+  	'access callback' => 'user_access',
+  	'access arguments' => array('edit asr forms')
   );
   
  /* $items['asr_forms/history'] = $base + array(
@@ -83,7 +84,7 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 	$form['asr_alignement']['algnement_name'] = array(
 			'#type' => 'textfield',
 			'#title' => t('Alignement Name'),
-			'#description' => t('Enter Alignement Name'),
+			'#description' => t('Enter Alignement Name. Give unique name according to DNA sequence which can be used in alignement history later.'),
 			'#required' => TRUE,
 	);
 	
@@ -91,7 +92,7 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#type' => 'file',
 			'#title' => t('File Path'),
 			'#size' => 50,
-			'#description' => t('Upload DNA sequence for alignement in FASTA format'),
+			'#description' => t('Upload DNA sequence for alignement in <a href="" target="_blank">correct format</a>.'),
 			'#required' => TRUE,
 	);
 		
@@ -99,14 +100,14 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#type' => 'select',
 			'#options' => array(),
 			'#title' => t('Organisms List'),
-			'#description' => t('You can choose one organism from list.'),
+			'#description' => t('Choose one organism from list.'),
 			'#required' => TRUE,
 	);
 	$form['asr_alignement']['alignement_retrotransposons'] = array(
 			'#type' => 'select',
 			'#options' => array(),
 			'#title' => t('Retrotransposons List'),
-			'#description' => t('You can choose one retrotransposon from list.'),
+			'#description' => t('Choose one retrotransposon from list.'),
 			'#required' => TRUE,
 	);
 	$form['asr_alignement']['alignement_retrotransposons_portion'] = array(
@@ -115,11 +116,11 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#title' => t('Retrotransposons Portion List'),
 			'#multiple' => TRUE,
 			'#size' => 3,
-			'#description' => t('You can choose one retrotransposon portion from list.'),
+			'#description' => t('Choose at least one retrotransposon portion from list.'),
 			'#required' => TRUE,
 	);
 	$form['asr_alignement']['loading-small'] = array(
-			'#markup' => "<img src='/".drupal_get_path('module', 'asr_forms')."/images/loading-small.gif' class='loading_small' />",
+			'#markup' => "<div class='loading_small'><div class='ajax-progress'><div class='throbber'></div>".t('Please wait...')."</div></div>",
 	);
 	$form['asr_alignement']['alignement_segment_length'] = array(
 			'#type' => 'select',
