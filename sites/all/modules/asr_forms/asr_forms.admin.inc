@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * Sequence alignement - admin settings form
+ * Implementation of hook_form().
+ */
 function asr_forms_admin_settings_form($form, &$form_state) {
  	$form['threshold_settings'] = array(
     	'#type' => 'fieldset',

@@ -65,6 +65,10 @@ function asr_forms_menu() {
   return $items;
 }
 
+/**
+ * Sequence alignement form
+ * Implementation of hook_form().
+ */
 function asr_forms_sequence_alignement_form($form, &$form_state) {	
 	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
 	drupal_add_js('misc/collapse.js');
@@ -136,12 +140,6 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#description' => t('Select threshold value for sequence alignement.'),
 			'#required' => FALSE,
 	);
-	
-	/*$form['asr_alignement']['submit'] = array(
-			'#type' => 'button',
-			'#value' => t('Align sequence'),
-			//'#attributes' => array('class' => 'submit_algorithm'),
-	);*/
 
   $form['asr_alignement']['submit'] = array(
     '#type' => 'submit',
@@ -162,6 +160,9 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 	return $form;
 }
 
+/**
+ * Implementation of hook_form_validate().
+ */
 function asr_forms_sequence_alignement_form_validate($form, $form_state) {
 	$error = "";
 	if(empty($form_state['values']['algnement_name'])) {
@@ -181,22 +182,18 @@ function asr_forms_sequence_alignement_form_validate($form, $form_state) {
 	}
 	return $error;
 }
+
 /**
+ * AJAX callback function for alignement form
  * Select the 'box' element, change the markup in it, and return it as a
  * renderable array.
  *
  * @return renderable array (the box element)
  */
 function asr_forms_submit_driven_callback($form, $form_state) {
-	/*drupal_set_message(t("Error saving user account."), 'error');
-			$form_state['redirect'] = '';
-			return;*/
-			//echo "<pre>";
-			//print(implode(",", $form_state['values']['alignement_retrotransposons_portion']));
-			//exit;
-$messages = drupal_get_messages();
-$element = $form['asr_alignement']['box'];
-//$element['#markup'] = '';
+	$messages = drupal_get_messages();
+	$element = $form['asr_alignement']['box'];
+
 	$error = asr_forms_sequence_alignement_form_validate($form, $form_state);
 	if(!empty($error)) {		
 		$element['#markup'] = asr_forms_error_script($error['error'], $error['field']);
@@ -216,6 +213,13 @@ $element = $form['asr_alignement']['box'];
 	return $element;
 }
 
+/**
+ * Display/hide of error in alignement form
+ * @param  string    $error - in case of error, otherwise empty to hide previous errors
+ * @param  string    $field - in case of error in some field
+ *
+ * @return string    $script
+ */
 function asr_forms_error_script($error = '', $field = '') {
 	if(!empty($error)) {
 		$script = '<script type="text/javascript">
@@ -235,6 +239,12 @@ function asr_forms_error_script($error = '', $field = '') {
 	return $script;
 }
 
+/**
+ * Wrap each result of alignement
+ * @param  object    $result
+ *
+ * @return string    $out - @see asr_forms_wrap_result()
+ */
 function asr_forms_alignement_result($result) {
 	$out = ''; 
 	$collapsed = true;
@@ -263,6 +273,13 @@ function asr_forms_alignement_result($result) {
 	return $out;
 }
 
+/**
+ * Display result of alignement, use table and fieldset collapsable themes
+ * @param  object    $value
+ * @param  bool      $collapsed (first result false, rest true)
+ *
+ * @return string    $result_html - result from theme()
+ */
 function asr_forms_wrap_result($value, $collapsed = false) {	
 	$LoaclAlignmentResult_table = $ExactMatchAlignResult_table = '';
 	
@@ -318,6 +335,14 @@ function asr_forms_wrap_result($value, $collapsed = false) {
 	return theme('fieldset', array('element' => $current_fieldset));
 }
 
+/**
+ * Build array for from selects treshold/slice legth ext...
+ * @param  int    $min
+ * @param  int    $max
+ * @param  int    $interval
+ *
+ * @return array    $select_arr
+ */
 function build_select_arr($min, $max, $interval) {
 	$curr = $min;
 	$select_arr = Array();
