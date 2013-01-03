@@ -306,7 +306,8 @@ function DoASRAlign($alignement_string, $form_values) {
 	$out = $response->DoASRAlignAlternateResult;
 	global $user;
 	if(module_exists("asr_archive")) {
-	    $out_res = serialize($out);
+	    //$out_res = mysql_real_escape_string(serialize($out));
+	    $out_res = base64_encode(gzcompress(serialize($out)));
 	    //$today  = date("Y-m-d");
 	    $user_id = $user->uid;
 	    $algnement_name = $form_values['algnement_name'];

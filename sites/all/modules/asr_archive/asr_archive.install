@@ -15,16 +15,15 @@ function asr_archive_schema() {
     'description' => t('ASR Archive of alignements per user/date/alignement name'),
     'fields' => array(
       'id' => array(
-           'description' => t('The primary identifier'),
-           'type' => 'serial',
-           'not null' => TRUE,
-           'unsigned' => TRUE,
+        'description' => t('The primary identifier'),
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
       ),
       'tmp' => array(
         'description' => t('A Unix timestamp indicating when this row was created.'), 
-        'type' => 'int', 
-        'not null' => TRUE, 
-        'default' => strtotime('now'),
+        'mysql_type' => 'timestamp',
+        'not null' => TRUE,
       ),
       'alignement' => array(
         'description' => t('Alignment name'), 
@@ -41,6 +40,7 @@ function asr_archive_schema() {
       'result' => array(
         'description' => t('Serialized alignement result'),
         'type' => 'blob',
+        'size' => 'big',
         'not null' => FALSE,
       ) 
     ),

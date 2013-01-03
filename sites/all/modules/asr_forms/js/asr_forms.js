@@ -60,6 +60,28 @@
 	   }, "json");
   };
   
+  //ajax request to fill relevant list
+  //Archive result
+  ASR_Forms.GetArchiveResult = function(id) {
+	  $('#result').load('/asr_archive/archive_result/'+id, function() {
+		  alert('Load was performed.');
+	  });
+	  /*var DataObject = new Object();
+	  DataObject.id = id;
+	  alert(DataObject.toSource());
+	  jQuery.post('/asr_archive/archive_result', DataObject,
+	  function(data){
+		      alert(data.toSource());
+		      if(data.Error == 'NoError') {
+		    	  box = data.html_result;
+	   		  }
+		      else {
+		    	  alert('Error accured in method');
+		      }
+		      jQuery(".loading_small").hide();
+	   }, "json");*/
+  };
+  
   //add items to select field
   ASR_Forms.addItems = function(list, data) {
 	//  alert(data.toSource());
@@ -72,8 +94,8 @@
 })(jQuery);
 
 jQuery(document).ready(function() {
-	ASR_Forms.GetOrganismList();
+	ASR_Forms.GetOrganismList();	
 	jQuery("#edit-alignement-organisms").change(function() { ASR_Forms.GetRetrotransposonsList(jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
 	jQuery("#edit-alignement-retrotransposons").change(function() { ASR_Forms.GetRetrotransposonsPortionList(jQuery("#edit-alignement-organisms").val(), jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
-    //$('.submit_algorithm').bind('click', function() {$.GF_SubmitForm('real');}); 
+	//jQuery('#1').click(function() {alert('kuku');/*ASR_Forms.GetArchiveResult(this.id);*/}); 
 });

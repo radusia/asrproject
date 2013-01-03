@@ -90,8 +90,9 @@
 })(jQuery);
 
 jQuery(document).ready(function() {
+	alert('here');
 	//jQuery('.archive_result').bind('click', function() {alert('kuku');/*ASR_Forms.GetArchiveResult(this.id);*/}); 
-	jQuery(".archiveresult").click(function() { alert(this.val());});
+	jQuery(".archiveresult").click(function() { alert(this.attr("id"));});
 	ASR_Forms.GetOrganismList();
 	
 	jQuery("#edit-alignement-organisms").change(function() { ASR_Forms.GetRetrotransposonsList(jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });

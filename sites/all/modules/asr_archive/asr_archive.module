@@ -2,7 +2,7 @@
 
 
 function asr_archive_init() {
-	drupal_add_js(drupal_get_path('module', 'asr_archive').'/js/asr_forms.js');
+	//drupal_add_js(drupal_get_path('module', 'asr_archive').'/js/asr_forms.js');
 	drupal_add_css(drupal_get_path('module', 'asr_forms').'/css/asr_forms.css');
 }
 
@@ -46,12 +46,12 @@ function asr_archive_menu() {
   	'access callback' => 'user_access',
     'access callback' => TRUE,
   );
-  $items['asr_archive/archive_result'] = array(
+  $items['asr_archive/archive_result/%'] = array(
       'type' => MENU_NORMAL_ITEM,
       'title' => 'ASR Archive Result',
       'description' => 'ASR Archive Result',
       'page callback' => 'display_archive_result',
-      'page arguments' => array(),
+      'page arguments' => array(2),
       'access callback' => 'user_access',
       'access callback' => TRUE,
   );
@@ -59,23 +59,23 @@ function asr_archive_menu() {
   
   return $items;
 }
-function display_archive_result(){
-  $Id = strip_tags(isset($_POST["id"]) ? $_POST["id"] : 1);
-  $sql = "SELECT result FROM asr_archive WHERE id =".$Id;
+function display_archive_result($arg){
+  $result_id = strip_tags(isset($arg[0]) ? $arg[0] : 1);
+  $sql = "SELECT result FROM asr_archive WHERE id =".$result_id;
   $result = db_query($sql);
   $res = '';
   while ($row = $result->fetchAssoc()){
      $res = $row['result'];
   }
-  $res = unserialize($res);
- // mail("marinabromberg@gmail.com","fff",$res);
-  $out = asr_forms_alignement_result($res);
-  
-  _output_json_response($out);
+
+  $res_arr = unserialize(gzuncompress(base64_decode($res)));
+  // mail("marinabromberg@gmail.com","fff",$res);
+  echo asr_forms_alignement_result($res_arr);
+  //_output_json_response($out);
 }
 function asr_archive_search_form($form, &$form_state){
-	//drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
-	//drupal_add_js('misc/collapse.js');
+	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
+	drupal_add_js('misc/collapse.js');
 	$form['asr_alignement'] = array(
 			'#type' => 'fieldset',
 			'#title' => t('Search Alignement'),
@@ -139,6 +139,12 @@ function asr_archive_search_form($form, &$form_state){
   $form['result']['box'] = array(
   		'#type' => 'markup',
   		'#prefix' => '<div id="box" style="float:left;">',
+  		'#suffix' => '</div>',
+  		//'#markup' => '<h1>Result Here</h1>',
+  );
+  $form['result_box']['result'] = array(
+  		'#type' => 'markup',
+  		'#prefix' => '<div id="result" style="float:left;">',
   		'#suffix' => '</div>',
   		//'#markup' => '<h1>Result Here</h1>',
   );
