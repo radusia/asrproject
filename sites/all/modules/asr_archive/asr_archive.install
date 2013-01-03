@@ -1,0 +1,53 @@
+<?php 
+// $Id$
+/**
+ * Implementation of hook_uninstall().
+ */
+function asr_archive_uninstall() {
+	drupal_uninstall_schema('asr_archive');
+}
+/**
+* Implementation of hook_schema().
+*/
+function asr_archive_schema() {
+
+  $schema['asr_archive'] = array(
+    'description' => t('ASR Archive of alignements per user/date/alignement name'),
+    'fields' => array(
+      'id' => array(
+           'description' => t('The primary identifier'),
+           'type' => 'serial',
+           'not null' => TRUE,
+           'unsigned' => TRUE,
+      ),
+      'tmp' => array(
+        'description' => t('A Unix timestamp indicating when this row was created.'), 
+        'type' => 'int', 
+        'not null' => TRUE, 
+        'default' => strtotime('now'),
+      ),
+      'alignement' => array(
+        'description' => t('Alignment name'), 
+        'type' => 'text', 
+        'not null' => TRUE, 
+        'size' => 'medium', 
+      ),
+      'userid' => array(
+        'description' => t('User id'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'result' => array(
+        'description' => t('Serialized alignement result'),
+        'type' => 'blob',
+        'not null' => FALSE,
+      ) 
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+
+
+

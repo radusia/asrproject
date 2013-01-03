@@ -1,0 +1,283 @@
+<?php
+
+
+function asr_archive_init() {
+	drupal_add_js(drupal_get_path('module', 'asr_archive').'/js/asr_forms.js');
+	drupal_add_css(drupal_get_path('module', 'asr_forms').'/css/asr_forms.css');
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+/*function asr_forms_permission() {
+  return array(
+    'create asr forms' => array(
+      'title' => t('Edit ASR Forms'),
+      'description' => t('View/Edit/Submit ASR Forms'),
+    ),
+ );
+}*/
+
+/**
+ * Implementation of hook_menu().
+ */
+function asr_archive_menu() {
+  
+  $items = array();
+  
+  $items['admin/config/system/asr_archive'] = array(
+  //	'type' => MENU_CALLBACK,
+  	'title' => 'ASR Forms Settings',
+  	'description' => 'Configure ASR Archive Forms settings.',
+  	'page callback' => 'drupal_get_form',
+  	'page arguments' => array('asr_archive_admin_settings_form'),
+  	'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+  	//'file' => 'asr_forms.admin.inc',
+  	'weight' => 100,
+  );
+  
+  $items['asr_archive/search'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'ASR Archive',
+  		'description' => 'ASR Archive Search',
+  	'page callback' => 'drupal_get_form',
+  	'page arguments' => array('asr_archive_search_form'),
+  	'access callback' => 'user_access',
+    'access callback' => TRUE,
+  );
+  $items['asr_archive/archive_result'] = array(
+      'type' => MENU_NORMAL_ITEM,
+      'title' => 'ASR Archive Result',
+      'description' => 'ASR Archive Result',
+      'page callback' => 'display_archive_result',
+      'page arguments' => array(),
+      'access callback' => 'user_access',
+      'access callback' => TRUE,
+  );
+  
+  
+  return $items;
+}
+function display_archive_result(){
+  $Id = strip_tags(isset($_POST["id"]) ? $_POST["id"] : 1);
+  $sql = "SELECT result FROM asr_archive WHERE id =".$Id;
+  $result = db_query($sql);
+  $res = '';
+  while ($row = $result->fetchAssoc()){
+     $res = $row['result'];
+  }
+  $res = unserialize($res);
+ // mail("marinabromberg@gmail.com","fff",$res);
+  $out = asr_forms_alignement_result($res);
+  
+  _output_json_response($out);
+}
+function asr_archive_search_form($form, &$form_state){
+	//drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
+	//drupal_add_js('misc/collapse.js');
+	$form['asr_alignement'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Search Alignement'),
+	);
+	
+	$form['asr_alignement']['error'] = array(
+			'#type' => 'markup',
+			'#prefix' => '<div class="asr_forms_error">',
+			'#suffix' => '</div>',
+	);
+	
+	$form['asr_alignement']['algnement_name'] = array(
+	        '#prefix' => '<div><div style="float:left;">',
+	        '#suffix' => '</div>',
+	        '#attributes' => array('style' => "width:150px;"),
+			'#type' => 'textfield',
+			'#title' => t('Alignement Name'),
+	);
+	
+	$form['asr_alignement']['from'] = array(
+	    '#prefix' => '<div style="float:left;">',
+	    '#suffix' => '</div>',
+	    '#title' => 'From Date:',
+	    '#attributes' => array('style' => "width:150px;"),
+	    '#type' => 'date_popup', // Provided by the date_popup module
+	    '#date_format' => 'Y-m-d', // Uses the PHP date() format - http://php.net/manual/en/function.date.php
+	    '#date_year_range' => '-3:0', // Limits the year range to the next two upcoming years
+	    '#description' => '',
+	);
+	$form['asr_alignement']['to'] = array(
+	    '#prefix' => '<div style="float:left;">',
+	    '#suffix' => '</div>',
+	    '#title' => 'To Date:',
+	    '#date_label_position' => 'above',
+	    '#attributes' => array('style' => "width:150px;"),
+	    '#type' => 'date_popup', // Provided by the date_popup module
+	    '#date_format' => 'Y-m-d', // Uses the PHP date() format - http://php.net/manual/en/function.date.php
+	    '#date_year_range' => '-3:0', // Limits the year range to the next two upcoming years
+	    '#description' => '',
+	);
+
+  $form['asr_alignement']['submit'] = array(
+      '#prefix' => '<div style="float:left;">',
+      '#suffix' => '</div></div>',
+      '#attributes' => array('style' => "margin-top: 17px;"),
+    '#type' => 'submit',
+    '#ajax' => array(
+      'callback' => 'asr_archive_submit_driven_callback',
+      'wrapper' => 'box',
+      'name' => 'submit1',
+    ),
+    '#value' => t('Search'),
+  );
+  	
+	$form['result'] = array(
+			'#type' => 'fieldset',
+			'#prefix' => '<div id="box" style="display:none;">',
+  			'#suffix' => '</div>',
+			
+	);
+  $form['result']['box'] = array(
+  		'#type' => 'markup',
+  		'#prefix' => '<div id="box" style="float:left;">',
+  		'#suffix' => '</div>',
+  		//'#markup' => '<h1>Result Here</h1>',
+  );
+	return $form;
+}
+function asr_archive_element_info_alter(&$type) {
+  if (isset($type['date_popup'])) {
+    $type['date_popup']['#process'][] = 'asr_archive_date_popup_process';
+  }
+}
+
+function asr_archive_date_popup_process($element, $form_state, $complete_form) {
+  
+  unset($element['date']['#description']);
+  unset($element['date']['#title']);
+  return $element;
+}
+function asr_archive_admin_settings_form($form, &$form_state) {
+  $form['alignement_name'] = array(
+   		'#type' => 'textfield',
+        '#title' => t('Alignement Name'),
+   		'#default_value' => '',
+  );
+  $form['from'] = array(
+      '#title' => t('From:'),
+      '#type' => 'date_popup', // Provided by the date_popup module
+      '#date_format' => 'F-m-d', // Uses the PHP date() format - http://php.net/manual/en/function.date.php
+      '#date_year_range' => '-3:0', // Limits the year range to the next two upcoming years
+      '#required' => TRUE,
+  );
+  $form['to'] = array(
+      '#title' => t('To:'),
+      '#type' => 'date_popup', // Provided by the date_popup module
+      '#date_format' => 'F-m-d', // Uses the PHP date() format - http://php.net/manual/en/function.date.php
+      '#date_year_range' => '-3:0', // Limits the year range to the next two upcoming years
+      '#required' => TRUE,
+  );
+  $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Submit'),
+  );
+   $form['box'] = array(
+  		'#type' => 'markup',
+  		'#prefix' => '<div id="box">',
+  		'#suffix' => '</div>',
+  		//'#markup' => '<h1>Result Here</h1>',
+  );
+  return $form;
+}
+function asr_archive_submit_driven_callback($form, $form_state) {
+  global $user;
+  $user_id = $user->uid;
+  $messages = drupal_get_messages();
+  $element = $form['result']['box'];
+
+  $error = asr_archive_search_form_validate($form, $form_state);
+  if(!empty($error)) {
+    $element['#markup'] = asr_archive_error_script($error['error'], $error['field']);
+  }
+  else { // submit alignement algorithms
+    $where = 'WHERE ';
+    if(!empty($form_state['input']['algnement_name']))
+       $where .= 'alignement = \''.$form_state['input']['algnement_name'].'\'';
+    if(!empty($form_state['input']['to']['date']))
+        $date_to = $form_state['input']['to']['date'];
+    if(!empty($form_state['input']['from']['date']))
+      $date_from = $form_state['input']['from']['date'];
+    if(!empty($date_from) && !empty($date_to))
+    {
+      if($where != 'WHERE ') $where .=' AND';
+        $where .= ' tmp > \''.$date_from.' 00:00:00\' AND  tmp < \''.$date_to.' 00:00:00\'';
+    }
+    elseif(!empty($date_from)){
+      if($where != 'WHERE ') $where .=' AND';
+        $where .= ' tmp >\''.$date_from.' 00:00:00\'';
+    }
+    elseif(!empty($date_to)){
+        if($where != 'WHERE ') $where .=' AND';
+        $where .= ' tmp <\''.$date_to.' 00:00:00\'';
+    }
+   $sql = "SELECT id,alignement,tmp,userid FROM asr_archive ".$where;
+   $result = db_query($sql);
+    if (!$result) {
+    	echo "Could not successfully run query ($sql) from DB: " . mysql_error();
+    	exit;
+	}
+   $header1 = array();
+   $rows1 = array();
+    if($result->rowCount() == 0){
+   		$result_table = "No Result";
+   }
+   while ($row = $result->fetchAssoc()){
+   		if($user_id == $row['userid']){
+   			$rows1 [] = array(
+				array('data' => $row['alignement']),
+				array('data' => $row['tmp']),
+				array('data' => '<input type="button" value="view" class="archiveresult" id = "'.$row['id'].'" name = "'.$row['id'].'" onclick="ASR_Forms.GetArchiveResult('.$row['id'].')" />'),
+   			   // array('data' => '<a href="#" class="archive_result" id = "'.$row['id'].'" > View </a>'),
+			);
+		
+   			$result_table = theme('table', array('header' => $header1, 'rows' => $rows1));
+   	  	}
+   }
+  }
+  $element['#markup'] = $result_table;
+  $element['#prefix'] = '<div id="box">';
+  $element['#suffix'] = '</div>';
+  return $element;
+}
+function asr_archive_search_form_validate($form, $form_state) {
+  $error = "";
+  if(empty($form_state['values']['algnement_name']) && empty($form_state['values']['from']) && empty($form_state['values']['to'])) {
+    $error = array('error' => t('Please specify name for alignement or from date and to date '), 'field' => 'algnement-name');
+  }
+ 
+  return $error;
+}
+/**
+ * Display/hide of error in alignement form
+ * @param  string    $error - in case of error, otherwise empty to hide previous errors
+ * @param  string    $field - in case of error in some field
+ *
+ * @return string    $script
+ */
+function asr_archive_error_script($error = '', $field = '') {
+  if(!empty($error)) {
+    $script = '<script type="text/javascript">
+    jQuery(\'input\').removeClass(\'error\');
+    jQuery(\'select\').removeClass(\'error\');
+    '.(!empty($field)? 'jQuery(\'#edit-'.$field.'\').addClass(\'error\');':'').'
+    jQuery(\'.asr_forms_error\').html(\'<div class="messages error">'.$error.'</div>\');
+    </script>';
+  }
+  else {
+    $script = '<script type="text/javascript">
+    jQuery(\'input\').removeClass(\'error\');
+    jQuery(\'select\').removeClass(\'error\');
+    jQuery(\'.asr_forms_error\').html(\'\');
+    </script>';
+  }
+  return $script;
+}
