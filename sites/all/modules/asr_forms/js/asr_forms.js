@@ -90,7 +90,24 @@
     	  list.append(jQuery("<option></option>").attr("value",itemData.Id).text(itemData.Name)); 
       });
   };
-  //$(Drupal.Panels.autoAttach);
+  
+  ASR_Forms.toggleCollapse = function(id) {
+	  //alert(id);
+	  //alert($("#"+id).is('.collapsed'));
+	  if(jQuery("#"+id).is('.collapsed')) {
+		  jQuery("#"+id).removeClass('collapsed');
+		  jQuery("."+id).show();
+	  }
+	  else {
+		  jQuery("#"+id).addClass('collapsed');
+		  jQuery("."+id).hide();
+	  }
+};
+ASR_Forms.tableSorter = function(id) {
+	alert('hhhh');
+	jQuery("table").tablesorter({debug: true});
+}
+
 })(jQuery);
 
 jQuery(document).ready(function() {

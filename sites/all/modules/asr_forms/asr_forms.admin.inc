@@ -8,7 +8,7 @@ function asr_forms_admin_settings_form($form, &$form_state) {
  	$form['threshold_settings'] = array(
     	'#type' => 'fieldset',
  		'#title' => t('Alignement Form Threshold Settings'),
- 		'#description' => t('text here'),
+ 		'#description' => t(''),
   	);
  	$form['threshold_settings']['threshold_min'] = array(
  			'#type' => 'textfield',
@@ -29,7 +29,7 @@ function asr_forms_admin_settings_form($form, &$form_state) {
  	$form['segment_settings'] = array(
  			'#type' => 'fieldset',
  			'#title' => t('Alignement Form Segment Settings'),
- 			'#description' => t('text here'),
+ 			'#description' => t(''),
  	);
  	$form['segment_settings']['segment_length_min'] = array(
  			'#type' => 'textfield',
@@ -45,6 +45,21 @@ function asr_forms_admin_settings_form($form, &$form_state) {
  			'#type' => 'textfield',
  			'#title' => t('Segment length interval'),
  			'#default_value' => ASR_FORMS_SEGMENT_INTERVAL,
+ 	); 	
+ 	$form['score_matrix_settings'] = array(
+ 			'#type' => 'fieldset',
+ 			'#title' => t('Alignement Form Score Matrix Settings'),
+ 			'#description' => t(''),
+ 	);
+ 	$form['score_matrix_settings']['cost_gap_min'] = array(
+ 			'#type' => 'textfield',
+ 			'#title' => t('Minimum cost gap value'),
+ 			'#default_value' => ASR_FORMS_COST_GAP_MIN,
+ 	);
+ 	$form['score_matrix_settings']['cost_gap_max'] = array(
+ 			'#type' => 'textfield',
+ 			'#title' => t('Maximum cost gap value'),
+ 			'#default_value' => ASR_FORMS_COST_GAP_MAX,
  	);
  	
  	return system_settings_form($form);

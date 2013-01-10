@@ -25,4 +25,17 @@
 	color: green;
 	font-weight: bold;
 }
+td.collapsible {
+    background: url("/misc/menu-expanded.png") no-repeat scroll 5px 65% transparent;
+    padding-left: 15px;
+	cursor: pointer;
+}
+td.collapsed {
+    background-image: url("/misc/menu-collapsed.png");
+    background-position: 5px 50%;
+}
+td.collapsedrow {
+	display: none;
+	background-color: #FFFFFF;
+}
 /*end - Alignement form css*/

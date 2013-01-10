@@ -13,6 +13,8 @@ define('ASR_FORMS_SEGMENT_MIN', variable_get('segment_length_min', 1));
 define('ASR_FORMS_SEGMENT_MAX',  variable_get('segment_length_max', 10));
 define('ASR_FORMS_SEGMENT_INTERVAL',  variable_get('segment_length_interval', 1));
 
+define('ASR_FORMS_COST_GAP_MIN', variable_get('segment_cost_gap_min', -5));
+define('ASR_FORMS_COST_GAP_MAX',  variable_get('segment_cost_gap_max', 0));
 /**
  * Implementation of hook_init().
  */
@@ -70,6 +72,7 @@ function asr_forms_menu() {
  * Implementation of hook_form().
  */
 function asr_forms_sequence_alignement_form($form, &$form_state) {	
+	drupal_add_js('misc/jquery.tablesorter.js');
 	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
 	drupal_add_js('misc/collapse.js');
 	$form['asr_alignement'] = array(
@@ -139,8 +142,46 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#title' => t('Alignement Threshold'),
 			'#description' => t('Select threshold value for sequence alignement (the value is in %).'),
 			'#required' => FALSE,
+			'#default_value' => 50,
 	);
-
+	
+	$form['asr_alignement']['alignement_extension_cost'] = array(
+			'#type' => 'select',
+			'#options' => build_select_arr(ASR_FORMS_COST_GAP_MIN, ASR_FORMS_COST_GAP_MAX, 1),
+			'#title' => t('Gap Extension Cost'),
+			'#description' => t('Select gap extension cost.'),
+			'#required' => FALSE,
+			'#default_value' => -1,
+	);
+	
+	$form['asr_alignement']['alignement_open_cost'] = array(
+			'#type' => 'select',
+			'#options' => build_select_arr(ASR_FORMS_COST_GAP_MIN, ASR_FORMS_COST_GAP_MAX, 1),
+			'#title' => t('Gap Open Cost '),
+			'#description' => t('Select gap open cost.'),
+			'#required' => FALSE,
+			'#default_value' => -1,
+	);
+	
+	$form['asr_alignement']['alignement_min_local_cost'] = array(
+			'#type' => 'select',
+			'#options' => build_select_arr(ASR_FORMS_COST_GAP_MIN, ASR_FORMS_COST_GAP_MAX, 1),
+			'#title' => t('Min Local Alignment Score Matrix '),
+			'#description' => t('Select minimum local alignements cost.'),
+			'#required' => FALSE,
+			'#default_value' => 0,
+	);
+	
+	$form['asr_alignement']['alignement_options'] = array(
+			'#type' => 'checkboxes',
+			'#options' => array('alignement_non_overlap' => t('Remove Non Overlap Repeat Match'), 
+							    'alignement_align_ok' => t('Return Only Local Align Ok'),
+							    'alignement_shuffeled_sequence' => t('Check Result With Shuffeled Sequence')),
+			'#title' => t('Alignemet Options'),
+			//'#description' => t('Select threshold value for sequence alignement (the value is in %).'),
+			'#required' => FALSE,
+	);
+	
   $form['asr_alignement']['submit'] = array(
     '#type' => 'submit',
     '#ajax' => array(
@@ -247,7 +288,6 @@ function asr_forms_error_script($error = '', $field = '') {
  */
 function asr_forms_alignement_result($result) {
 	$out = ''; 
-	$collapsed = true;
 	if(isset($result->ASRAlignResult->RetrotransposonsPortionAlignResult)) {
 		$list = $result->ASRAlignResult->RetrotransposonsPortionAlignResult;
 		$list = is_array($list)?$list:array($list);
@@ -266,11 +306,17 @@ function asr_forms_alignement_result($result) {
 			//echo "<pre>";
 			//print_r($value,1);
 			//return;
- 			$out .= asr_forms_wrap_result($value, $collapsed);
- 			$collapsed = false;
+			if(isset($value->RepeatsMatch) && !empty($value->RepeatsMatch)) {
+				if(isset($value->RepeatsMatch->RepeatMatch) && !empty($value->RepeatsMatch->RepeatMatch))
+ 					$out .= asr_forms_wrap_result($value->RepeatsMatch->RepeatMatch, $value->RetrotransposonsPortion);
+			}
 		}
 	}
-	return $out;
+	$script = '<script type="text/javascript">
+			ASR_Forms.tableSorter();
+			</script>
+			';
+	return (!empty($out)? $out.$script : "<fieldset><center>No Data</center></fieldset>");
 }
 
 /**
@@ -280,23 +326,50 @@ function asr_forms_alignement_result($result) {
  *
  * @return string    $result_html - result from theme()
  */
-function asr_forms_wrap_result($value, $collapsed = false) {	
-	$LoaclAlignmentResult_table = $ExactMatchAlignResult_table = '';
+function asr_forms_wrap_result($RepeatMatch, $RetrotransposonsPortion) {	
+	$AlignResult_table = '';
 	
-	$header = $header1 = array();
-	$rows = $rows1 = array();
+	$header = array();
+	$rows = array();
 
 	$header = array(
-			array('data' => t('Number of Words')),
-			array('data' => t('Success Match Percentage')),);
-	$rows [] = array(  
-		array('data' => $value->ExactMatchAlignResult->NumWords),   
-		array('data' => ($value->ExactMatchAlignResult->SuccessMatchPercentage*100).'%'),
-	);
-	$ExactMatchAlignResult_table = theme('table', array('header' => $header, 'rows' => $rows));
+			array('data' => t('Repeat Name')),
+			array('data' => t('Score')),
+			array('data' => t('Start Offset')),
+			array('data' => t('End Offset')),
+			array('data' => t('Local Alignment Status')),);
+	$RepeatMatch = is_array($RepeatMatch)? $RepeatMatch : array($RepeatMatch);
+	foreach($RepeatMatch as $key => $value) {
+		$item_id = "collapsible".$RetrotransposonsPortion->Name.$key;
+		$rows [] = array(
+				array('data' => '<span onclick="ASR_Forms.toggleCollapse(\''.$item_id.'\');">'.$RetrotransposonsPortion->Name.'</span>', 
+					  'class' => 'collapsible collapsed',
+     				  'id' => $item_id,
+					  'alt' => $RetrotransposonsPortion->Repeat),
+				array('data' => $value->LocalAlignmentResult->Score),
+				array('data' => $value->StartOffset),
+				array('data' => $value->EndOffset),
+				array('data' => $value->LocalAlignmentStatus),
+		);
+		$rows [] = array(
+				array('data' => 'ASRSequence',
+					  'class' => 'collapsedrow '.$item_id,),
+				array('data' => $value->LocalAlignmentResult->ASRSequence,
+					  'class' => 'collapsedrow '.$item_id,
+					  'colspan' => 4),
+		);
+		$rows [] = array(
+				array('data' => 'GenSubSequence',
+					  'class' => 'collapsedrow '.$item_id,),
+				array('data' => $value->LocalAlignmentResult->GenSubSequence,
+					  'class' => 'collapsedrow '.$item_id,
+					  'colspan' => 4),
+		);
+	}
+	$AlignResult_table = theme('table', array('header' => $header, 'rows' => $rows));
+	return $AlignResult_table;
 	
-	
-	if(!empty($value->LoaclAlignmentResult)) {
+	/*if(!empty($value->LoaclAlignmentResult)) {
 		$header1 = array(
 				array('data' => t('Loacl Alignment Result'), 'colspan' => 2)
 		);
@@ -333,6 +406,7 @@ function asr_forms_wrap_result($value, $collapsed = false) {
 			'#children' => 'Repeat: '.$value->RetrotransposonsPortion->Repeat,
 			'#value' => $ExactMatchAlignResult_table. $LoaclAlignmentResult_table);
 	return theme('fieldset', array('element' => $current_fieldset));
+	*/
 }
 
 /**
