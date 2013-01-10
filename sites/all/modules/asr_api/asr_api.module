@@ -282,22 +282,32 @@ function DoASRAlign($alignement_string, $form_values) {
 	$NewSequence = $alignement_string;
 	$WordLength = $form_values['alignement_segment_length'];
 	$WordMatchPercentage = $form_values['alignement_threshold']/100;
-	$GapExtensionCost = -2;
-	$GapOpenCost = -1;
+	$GapExtensionCost = $form_values['alignement_extension_cost'];
+	$GapOpenCost = $form_values['alignement_open_cost'];
+	$MinLocalAlignmentScoreMatrix = $form_values['alignement_min_local_cost'];
+	$CheckResultWithShuffeledSequence = isset($form_values['alignement_options']['alignement_shuffeled_sequence']) ? 'true' : 'false';
+	$RemoveNonOverlapRepeatMatch = isset($form_values['alignement_options']['alignement_non_overlap']) ? 'true' : 'false';
+	$ReturnOnlyLocalAlignOk = isset($form_values['alignement_options']['alignement_align_ok']) ? 'true' : 'false';
 	
 	$params =array('input' => array('NewSequence' => $NewSequence,
 			'OrganismId' => $OrganismId,
 			'RetrotransposonsId' => $RetrotransposonsId,
 			'OrganismRetrotransposonsDelimitedList' => $RetrotransposonsPortionList,
-			'LocalAlignmentGapCost' => array('GapExtensionCost' => $GapExtensionCost, 'GapOpenCost' => $GapOpenCost),
-			'WordLength' => $WordLength,
-			'WordMatchPercentage' => $WordMatchPercentage));
+			'LocalAlignmentSetting' => array('CheckResultWithShuffeledSequence' => $CheckResultWithShuffeledSequence,
+											'GapExtensionCost' => $GapExtensionCost, 
+											'GapOpenCost' => $GapOpenCost,
+											'MinLocalAlignmentScoreMatrix' => $MinLocalAlignmentScoreMatrix),
+			'ExactMatchSetting' => array('WordLength' => $WordLength,
+									'WordMatchPercentage' => $WordMatchPercentage),
+			'RemoveNonOverlapRepeatMatch' => $RemoveNonOverlapRepeatMatch,
+			'ReturnOnlyLocalAlignOk' => $ReturnOnlyLocalAlignOk));
 	try {
 		$response = asr_api_service_call('DoASRAlignAlternate', $params);
 	}catch (Exception $e){
 		return $e;
 	}
 	//echo "<pre>";
+	//print_r( $form_values['alignement_options']);
 	//print_r($response);
 	//exit;
 	
