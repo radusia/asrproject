@@ -31,6 +31,18 @@ function asr_archive_schema() {
         'not null' => TRUE, 
         'size' => 'medium', 
       ),
+      'alignement_uid' => array(
+    	'description' => t('Alignment unique id'),
+    	'type' => 'text',
+    	'not null' => TRUE,
+    	'size' => 'medium',
+      ),
+      'chunk_offset' => array(
+    	'description' => t('Chunk offset'),
+    	'type' => 'int',
+    	'not null' => TRUE,
+    	'default' => 0,
+      ),
       'userid' => array(
         'description' => t('User id'),
         'type' => 'int',

@@ -2,41 +2,15 @@
 
 
 function asr_archive_init() {
-	//drupal_add_js(drupal_get_path('module', 'asr_archive').'/js/asr_forms.js');
 	drupal_add_css(drupal_get_path('module', 'asr_forms').'/css/asr_forms.css');
 }
-
-/**
- * Implementation of hook_perm().
- */
-/*function asr_forms_permission() {
-  return array(
-    'create asr forms' => array(
-      'title' => t('Edit ASR Forms'),
-      'description' => t('View/Edit/Submit ASR Forms'),
-    ),
- );
-}*/
 
 /**
  * Implementation of hook_menu().
  */
 function asr_archive_menu() {
   
-  $items = array();
-  
-  $items['admin/config/system/asr_archive'] = array(
-  //	'type' => MENU_CALLBACK,
-  	'title' => 'ASR Forms Settings',
-  	'description' => 'Configure ASR Archive Forms settings.',
-  	'page callback' => 'drupal_get_form',
-  	'page arguments' => array('asr_archive_admin_settings_form'),
-  	'access callback' => 'user_access',
-    'access arguments' => array('administer site configuration'),
-  	//'file' => 'asr_forms.admin.inc',
-  	'weight' => 100,
-  );
-  
+  $items = array(); 
   $items['asr_archive/search'] = array(
     'type' => MENU_NORMAL_ITEM,
     'title' => 'ASR Archive',
@@ -59,21 +33,24 @@ function asr_archive_menu() {
   
   return $items;
 }
+/**
+ * get archived data by archive id
+ * @param  id 
+ */
 function display_archive_result($arg){
-  $result_id = strip_tags(isset($arg[0]) ? $arg[0] : 1);
-  $sql = "SELECT result FROM asr_archive WHERE id =".$result_id;
+  $result_id = strip_tags(isset($arg) ? $arg : 0);
+  $sql = "SELECT result FROM asr_archive WHERE alignement_uid ='".$result_id."'";
   $result = db_query($sql);
-  $res = '';
+  $res_arr = array();
   while ($row = $result->fetchAssoc()){
-     $res = $row['result'];
+     $res_arr[] = unserialize(gzuncompress(base64_decode($row['result'])));
   }
-
-  $res_arr = unserialize(gzuncompress(base64_decode($res)));
-  // mail("marinabromberg@gmail.com","fff",$res);
   echo asr_forms_alignement_result($res_arr);
-  //_output_json_response($out);
 }
+
+//implementation form for searching alignments
 function asr_archive_search_form($form, &$form_state){
+	drupal_add_js('misc/jquery.tablesorter.js');
 	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
 	drupal_add_js('misc/collapse.js');
 	$form['asr_alignement'] = array(
@@ -101,8 +78,8 @@ function asr_archive_search_form($form, &$form_state){
 	    '#title' => 'From Date:',
 	    '#attributes' => array('style' => "width:150px;"),
 	    '#type' => 'date_popup', // Provided by the date_popup module
-	    '#date_format' => 'Y-m-d', // Uses the PHP date() format - http://php.net/manual/en/function.date.php
-	    '#date_year_range' => '-3:0', // Limits the year range to the next two upcoming years
+	    '#date_format' => 'Y-m-d', 
+	    '#date_year_range' => '-3:0', 
 	    '#description' => '',
 	);
 	$form['asr_alignement']['to'] = array(
@@ -112,8 +89,8 @@ function asr_archive_search_form($form, &$form_state){
 	    '#date_label_position' => 'above',
 	    '#attributes' => array('style' => "width:150px;"),
 	    '#type' => 'date_popup', // Provided by the date_popup module
-	    '#date_format' => 'Y-m-d', // Uses the PHP date() format - http://php.net/manual/en/function.date.php
-	    '#date_year_range' => '-3:0', // Limits the year range to the next two upcoming years
+	    '#date_format' => 'Y-m-d', 
+	    '#date_year_range' => '-3:0', 
 	    '#description' => '',
 	);
 
@@ -162,38 +139,8 @@ function asr_archive_date_popup_process($element, $form_state, $complete_form) {
   unset($element['date']['#title']);
   return $element;
 }
-function asr_archive_admin_settings_form($form, &$form_state) {
-  $form['alignement_name'] = array(
-   		'#type' => 'textfield',
-        '#title' => t('Alignement Name'),
-   		'#default_value' => '',
-  );
-  $form['from'] = array(
-      '#title' => t('From:'),
-      '#type' => 'date_popup', // Provided by the date_popup module
-      '#date_format' => 'F-m-d', // Uses the PHP date() format - http://php.net/manual/en/function.date.php
-      '#date_year_range' => '-3:0', // Limits the year range to the next two upcoming years
-      '#required' => TRUE,
-  );
-  $form['to'] = array(
-      '#title' => t('To:'),
-      '#type' => 'date_popup', // Provided by the date_popup module
-      '#date_format' => 'F-m-d', // Uses the PHP date() format - http://php.net/manual/en/function.date.php
-      '#date_year_range' => '-3:0', // Limits the year range to the next two upcoming years
-      '#required' => TRUE,
-  );
-  $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Submit'),
-  );
-   $form['box'] = array(
-  		'#type' => 'markup',
-  		'#prefix' => '<div id="box">',
-  		'#suffix' => '</div>',
-  		//'#markup' => '<h1>Result Here</h1>',
-  );
-  return $form;
-}
+
+//get archived list of current user
 function asr_archive_submit_driven_callback($form, $form_state) {
   global $user;
   $user_id = $user->uid;
@@ -225,7 +172,7 @@ function asr_archive_submit_driven_callback($form, $form_state) {
         if($where != 'WHERE ') $where .=' AND';
         $where .= ' tmp <\''.$date_to.' 00:00:00\'';
     }
-   $sql = "SELECT id,alignement,tmp,userid FROM asr_archive ".$where;
+   $sql = "SELECT id, alignement_uid, alignement, tmp, userid FROM asr_archive ".$where." GROUP BY alignement_uid";
    $result = db_query($sql);
     if (!$result) {
     	echo "Could not successfully run query ($sql) from DB: " . mysql_error();
@@ -241,8 +188,7 @@ function asr_archive_submit_driven_callback($form, $form_state) {
    			$rows1 [] = array(
 				array('data' => $row['alignement']),
 				array('data' => $row['tmp']),
-				array('data' => '<input type="button" value="view" class="archiveresult" id = "'.$row['id'].'" name = "'.$row['id'].'" onclick="ASR_Forms.GetArchiveResult('.$row['id'].')" />'),
-   			   // array('data' => '<a href="#" class="archive_result" id = "'.$row['id'].'" > View </a>'),
+				array('data' => '<input type="button" value="view" class="archiveresult" id = "'.$row['alignement_uid'].'" name = "'.$row['alignement_uid'].'" onclick="ASR_Forms.GetArchiveResult(\''.$row['alignement_uid'].'\')" />'),
 			);
 		
    			$result_table = theme('table', array('header' => $header1, 'rows' => $rows1));
@@ -254,6 +200,9 @@ function asr_archive_submit_driven_callback($form, $form_state) {
   $element['#suffix'] = '</div>';
   return $element;
 }
+/**
+ validation of search form 
+ */
 function asr_archive_search_form_validate($form, $form_state) {
   $error = "";
   if(empty($form_state['values']['algnement_name']) && empty($form_state['values']['from']) && empty($form_state['values']['to'])) {
@@ -263,7 +212,7 @@ function asr_archive_search_form_validate($form, $form_state) {
   return $error;
 }
 /**
- * Display/hide of error in alignement form
+ * Display/hide of error in search form
  * @param  string    $error - in case of error, otherwise empty to hide previous errors
  * @param  string    $field - in case of error in some field
  *

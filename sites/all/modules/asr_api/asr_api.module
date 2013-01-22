@@ -84,6 +84,7 @@ function asr_api_service_call($method, $params=array(), $cache=false){
 	$options['cache_wsdl'] = WSDL_CACHE_NONE;
 
 	$wsdl = 'http://assr.uhurucloud.com/ASRServices.svc?wsdl';
+	$wsdl = 'http://94.159.184.226/ASRService.Application/ASRServices.svc?wsdl';
 	//$wsdl = 'http://assr.uhurucloud.com/TestWebServices.asmx?wsdl';
 	//$wsdl = 'http://ws.cdyne.com/psaddress/addresslookup.asmx?wsdl';
 	//$wsdl=$WD.($cache ? '' : '&k='.uniqid() );
@@ -275,7 +276,7 @@ function GetRetrotransposonsPortionList(){
  * 
  * @return object $out - alignement result
  */
-function DoASRAlign($alignement_string, $form_values) {
+function DoASRAlign($alignement_string, $form_values, $chunk_offset, $alignement_uid) {
 	$OrganismId = $form_values['alignement_organisms'];
 	$RetrotransposonsId = $form_values['alignement_retrotransposons'];
  	$RetrotransposonsPortionList = implode(",", $form_values['alignement_retrotransposons_portion']);
@@ -285,11 +286,12 @@ function DoASRAlign($alignement_string, $form_values) {
 	$GapExtensionCost = $form_values['alignement_extension_cost'];
 	$GapOpenCost = $form_values['alignement_open_cost'];
 	$MinLocalAlignmentScoreMatrix = $form_values['alignement_min_local_cost'];
-	$CheckResultWithShuffeledSequence = isset($form_values['alignement_options']['alignement_shuffeled_sequence']) ? 'true' : 'false';
-	$RemoveNonOverlapRepeatMatch = isset($form_values['alignement_options']['alignement_non_overlap']) ? 'true' : 'false';
-	$ReturnOnlyLocalAlignOk = isset($form_values['alignement_options']['alignement_align_ok']) ? 'true' : 'false';
+	$CheckResultWithShuffeledSequence = !empty($form_values['alignement_options']['alignement_shuffeled_sequence']) ? 'true' : 'false';
+	$RemoveNonOverlapRepeatMatch = !empty($form_values['alignement_options']['alignement_non_overlap']) ? 'true' : 'false';
+	$ReturnOnlyLocalAlignOk = !empty($form_values['alignement_options']['alignement_align_ok']) ? 'true' : 'false';
 	
 	$params =array('input' => array('NewSequence' => $NewSequence,
+			'ChunkOffset' => $chunk_offset,
 			'OrganismId' => $OrganismId,
 			'RetrotransposonsId' => $RetrotransposonsId,
 			'OrganismRetrotransposonsDelimitedList' => $RetrotransposonsPortionList,
@@ -321,7 +323,7 @@ function DoASRAlign($alignement_string, $form_values) {
 	    //$today  = date("Y-m-d");
 	    $user_id = $user->uid;
 	    $algnement_name = $form_values['algnement_name'];
-	    $sql = 'INSERT INTO asr_archive (alignement, userid,result) VALUES(\''.$algnement_name.'\','.$user_id.',\''.$out_res.'\')';
+	    $sql = 'INSERT INTO asr_archive (alignement, userid, alignement_uid, chunk_offset, result) VALUES(\''.$algnement_name.'\','.$user_id.',\''.$alignement_uid.'\', '.$chunk_offset.', \''.$out_res.'\')';
 	    db_query($sql);
 	    //mail("rachelm@gmail.com","ffff",$sql);
 	}

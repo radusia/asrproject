@@ -34,8 +34,25 @@ td.collapsed {
     background-image: url("/misc/menu-collapsed.png");
     background-position: 5px 50%;
 }
-td.collapsedrow {
-	display: none;
+tr.collapsedrow {
 	background-color: #FFFFFF;
 }
 /*end - Alignement form css*/
+th.headerSortUp { 
+    background-image: url(/misc/asc.gif); 
+    /*background-color: #3399FF; */
+}
+th.headerSortDown { 
+    background-image: url(/misc/desc.gif); 
+    /*background-color: #3399FF; */
+}
+th.header { 
+   // background-image: url(../img/small.gif);     
+    cursor: pointer; 
+    font-weight: bold; 
+    background-repeat: no-repeat; 
+    background-position: center left; 
+    padding-left: 20px; 
+    border-right: 1px solid #dad9c7; 
+    margin-left: -1px; 
+} 

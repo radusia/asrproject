@@ -1,8 +1,7 @@
-name = ASR archive forms
-description = Forms for ancient standard repeats detection in DNA sequence
+name = ASR archive
+description = History of ancient standard repeats detection in DNA sequence
 package = ASR project
 core = 7.x
 
 files[] = asr_archive.module
 dependencies[] = date_popup
-configure = admin/config/system/asr_archive

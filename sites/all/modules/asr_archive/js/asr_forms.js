@@ -87,15 +87,43 @@
       });
   };
   //$(Drupal.Panels.autoAttach);
+
+  /*Drupal.behaviors.collapsiblerow = {
+	alert('here');
+    $('.collapsiblerow').toggle(
+    		alert(this);
+      function() {
+        $(this).nextUntil('td.collapsitablesection').hide();
+      },
+      function() {
+        $(this).nextUntil('td.collapsitablesection').show();
+      }
+    ).click();
+  };*/
+  
+  
+  ASR_Forms.toggleCollapse = function(id) {
+		  alert(id);
+		  alert($("#"+id).is('.collapsed'));
+		  if($("#"+id).is('.collapsed')) {
+			  $("#"+id).removeClass('collapsed');
+			  $("."+id).hide();
+		  }
+		  else {
+			  $("#"+id).addClass('collapsed');
+			  $("."+id).show();
+		  }
+  };
+	  
 })(jQuery);
 
 jQuery(document).ready(function() {
-	alert('here');
 	//jQuery('.archive_result').bind('click', function() {alert('kuku');/*ASR_Forms.GetArchiveResult(this.id);*/}); 
 	jQuery(".archiveresult").click(function() { alert(this.attr("id"));});
 	ASR_Forms.GetOrganismList();
 	
 	jQuery("#edit-alignement-organisms").change(function() { ASR_Forms.GetRetrotransposonsList(jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
 	jQuery("#edit-alignement-retrotransposons").change(function() { ASR_Forms.GetRetrotransposonsPortionList(jQuery("#edit-alignement-organisms").val(), jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
-	//jQuery('#1').click(function() {alert('kuku');/*ASR_Forms.GetArchiveResult(this.id);*/}); 
+	//jQuery('#1').click(function() {alert('kuku');/*ASR_Forms.GetArchiveResult(this.id);*/});
+	//jQuery('.collapsiblerow').click(function() {alert(this);});
 });
