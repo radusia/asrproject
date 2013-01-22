@@ -10,8 +10,7 @@ define('DEBUG_MAIL', 'radusia@gmail.com');
 define('DEBUG_MODE_EMAIL', 0);
 
 //define('ASR_API_WSDL_URL', 'http://assr.uhurucloud.com/ASRServices.svc?wsdl');
-define('ASR_API_WSDL_URL', 'http://94.159.184.226/ASRService.Application/ASRServices.svc?wsdl');
-
+define('ASR_API_WSDL_URL', variable_get('wsdl_url', 'http://94.159.184.226/ASRService.Application/ASRServices.svc?wsdl'));
 /**
  * Implementation of hook_menu().
  */

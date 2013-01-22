@@ -8,7 +8,7 @@ function asr_forms_admin_settings_form($form, &$form_state) {
  	$form['threshold_settings'] = array(
     	'#type' => 'fieldset',
  		'#title' => t('Alignement Form Threshold Settings'),
- 		'#description' => t(''),
+ 		'#description' => t('Define minimum and maximum values for threshold select field in alignment form'),
   	);
  	$form['threshold_settings']['threshold_min'] = array(
  			'#type' => 'textfield',
@@ -29,7 +29,7 @@ function asr_forms_admin_settings_form($form, &$form_state) {
  	$form['segment_settings'] = array(
  			'#type' => 'fieldset',
  			'#title' => t('Alignement Form Segment Settings'),
- 			'#description' => t(''),
+ 			'#description' => t('Define minimum and maximum for segment length select in alignment form'),
  	);
  	$form['segment_settings']['segment_length_min'] = array(
  			'#type' => 'textfield',
@@ -48,8 +48,8 @@ function asr_forms_admin_settings_form($form, &$form_state) {
  	); 	
  	$form['score_matrix_settings'] = array(
  			'#type' => 'fieldset',
- 			'#title' => t('Alignement Form Score Matrix Settings'),
- 			'#description' => t(''),
+ 			'#title' => t('Alignment Form Score Matrix Settings'),
+ 			'#description' => t('Define minimum and maximum for alignment scor matrix select fields'),
  	);
  	$form['score_matrix_settings']['cost_gap_min'] = array(
  			'#type' => 'textfield',
