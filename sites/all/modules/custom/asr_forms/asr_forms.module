@@ -4,11 +4,6 @@
  * @file
  * ASR Forms module
  */
-/* $string = 'gggggggggggggggggggggggggggggggggggggggggtttttttttttttttttttttttttttttttttttttttttccccccccccccccccccccccccccccccccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaattttttttttttttttttttttttttttttttttssssssssssssssssssssssstttttttttttttttttggggggggggggggggg';
-$str_arr = chunk_string_to_array($string, 20);
-echo "<pre>";
-print_r($str_arr); */
-
 define('ASR_FORMS_THRESHOLD_MIN', variable_get('threshold_min', 0));
 define('ASR_FORMS_THRESHOLD_MAX',  variable_get('threshold_max', 100));
 define('ASR_FORMS_THRESHOLD_INTERVAL',  variable_get('threshold_interval', 10));
@@ -475,7 +470,7 @@ function asr_forms_alignement_result($result_arr) {
 		}
 	}
 	$script = '<script type="text/javascript">
-			setTimeout( function() { ASR_Forms.tableSorter(); alert("table sort"); } , 1000);
+			setTimeout( function() { ASR_Forms.tableSorter(); } , 1000);
 			</script>
 			';
 			
