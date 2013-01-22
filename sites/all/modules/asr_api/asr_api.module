@@ -8,23 +8,9 @@ define('DEBUG_MODE_WATCHDOG', 1);
 
 define('DEBUG_MAIL', 'radusia@gmail.com');
 define('DEBUG_MODE_EMAIL', 0);
-/**
- * Implementation of hook_init().
- */
-/*function asr_forms_init() {
-}*/
 
-/**
- * Implementation of hook_perm().
- */
-/*function asr_forms_permission() {
-  return array(
-    'create asr forms' => array(
-      'title' => t('Edit ASR Forms'),
-      'description' => t('View/Edit/Submit ASR Forms'),
-    ),
- );
-}*/
+//define('ASR_API_WSDL_URL', 'http://assr.uhurucloud.com/ASRServices.svc?wsdl');
+define('ASR_API_WSDL_URL', 'http://94.159.184.226/ASRService.Application/ASRServices.svc?wsdl');
 
 /**
  * Implementation of hook_menu().
@@ -33,7 +19,7 @@ function asr_api_menu() {
   $items = array();
   
   $items['admin/config/system/asr_api'] = array(
-  //	'type' => MENU_CALLBACK,
+  //'type' => MENU_CALLBACK,
   	'title' => 'API Settings',
   	'description' => 'Configure ASR API settings.',
   	'page callback' => 'drupal_get_form',
@@ -83,10 +69,8 @@ function asr_api_service_call($method, $params=array(), $cache=false){
 	$options['soap_version'] = SOAP_1_1;
 	$options['cache_wsdl'] = WSDL_CACHE_NONE;
 
-	$wsdl = 'http://assr.uhurucloud.com/ASRServices.svc?wsdl';
-	$wsdl = 'http://94.159.184.226/ASRService.Application/ASRServices.svc?wsdl';
-	//$wsdl = 'http://assr.uhurucloud.com/TestWebServices.asmx?wsdl';
-	//$wsdl = 'http://ws.cdyne.com/psaddress/addresslookup.asmx?wsdl';
+	$wsdl = ASR_API_WSDL_URL;
+	
 	//$wsdl=$WD.($cache ? '' : '&k='.uniqid() );
 
 	try {
@@ -313,19 +297,15 @@ function DoASRAlign($alignement_string, $form_values, $chunk_offset, $alignement
 	//print_r($response);
 	//exit;
 	
-	//@todo - in case module asr_archive is switched on, save $out in asr archive for current userid
-	
+	//In case module asr_archive is switched on, save $out in asr archive for current userid
 	$out = $response->DoASRAlignAlternateResult;
 	global $user;
 	if(module_exists("asr_archive")) {
-	    //$out_res = mysql_real_escape_string(serialize($out));
 	    $out_res = base64_encode(gzcompress(serialize($out)));
-	    //$today  = date("Y-m-d");
 	    $user_id = $user->uid;
 	    $algnement_name = $form_values['algnement_name'];
 	    $sql = 'INSERT INTO asr_archive (alignement, userid, alignement_uid, chunk_offset, result) VALUES(\''.$algnement_name.'\','.$user_id.',\''.$alignement_uid.'\', '.$chunk_offset.', \''.$out_res.'\')';
 	    db_query($sql);
-	    //mail("rachelm@gmail.com","ffff",$sql);
 	}
 	unset($response);
 	return $out;
