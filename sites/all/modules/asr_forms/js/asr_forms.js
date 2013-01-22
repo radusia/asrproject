@@ -1,9 +1,9 @@
 (function ($) {
   ASR_Forms = {};
 
-  //not in use
+  //not in use - will be in use for asynch alignmnet
   ASR_Forms.submitAlgorithm = function() {
-	 // alert('here');
+	 //alert('here');
   };
 
   //fill organism list select
@@ -42,7 +42,6 @@
   
   //ajax request to fill relevant list
   ASR_Forms.callAjax = function(Method, DataObject, ElementName) {
-	//  alert(this);
 	  List = jQuery("#edit-alignement-"+ElementName);
 	  jQuery.post('/asr_api/'+Method, DataObject,
 			  function(data){
@@ -66,38 +65,20 @@
 	  $('#result').load('/asr_archive/archive_result/'+id, function() {
 		  alert('Load was performed.');
 	  });
-	  /*var DataObject = new Object();
-	  DataObject.id = id;
-	  alert(DataObject.toSource());
-	  jQuery.post('/asr_archive/archive_result', DataObject,
-	  function(data){
-		      alert(data.toSource());
-		      if(data.Error == 'NoError') {
-		    	  box = data.html_result;
-	   		  }
-		      else {
-		    	  alert('Error accured in method');
-		      }
-		      jQuery(".loading_small").hide();
-	   }, "json");*/
   };
   
   //add items to select field
   ASR_Forms.addItems = function(list, data) {
-	//  alert(data.toSource());
-	//  alert(this);
+	  //  alert(data.toSource());
       $.each(data, function(index, itemData) {
     	  list.append(jQuery("<option></option>").attr("value",itemData.Id).text(itemData.Name)); 
       });
   };
   
+  //collase/uncollapse functionality
   ASR_Forms.toggleCollapse = function(id, ASRSequence, GenSubSequence) {
-	  //alert(id);
-	  //alert($("#"+id).is('.collapsed'));
 	  if(jQuery("#"+id).is('.collapsed')) {
 		  jQuery("#"+id).removeClass('collapsed');
-		  //jQuery("."+id).show();
-		  //jQuery('<tr><td>ASRSequence</td><td>'+ASRSequence+'</td></tr>').insertAfter(jQuery("#"+id));
 		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>ASRSequence</td><td colspan="4">'+ASRSequence+'</td></tr>');
 		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>GenSubSequence</td><td colspan="4">'+GenSubSequence+'</td></tr>');
 	  }
@@ -105,14 +86,16 @@
 		  jQuery("#"+id).addClass('collapsed');
 		  jQuery("#"+id).parent().next().remove();
 		  jQuery("#"+id).parent().next().remove();
-		  //jQuery("."+id).hide();
 	  }
    };
+   
+   //add collapsed rows to result table
    ASR_Forms.initCollapse = function() {
 	      jQuery('.collapsible').addClass('collapsed');
 	      jQuery('.collapsedrow').remove();
    };
-	   
+
+   //add sorting to result tables
    ASR_Forms.tableSorter = function(id) {
 	jQuery(".sticky-enabled").tablesorter({ sortList:[[1,0],[2,0],[3,0]] , headers: { 0: { sorter: false}, 4: {sorter: false} }});
 	jQuery(".header").mouseup(function() { ASR_Forms.initCollapse(); });
@@ -120,9 +103,9 @@
 
 })(jQuery);
 
+//call function on document ready
 jQuery(document).ready(function() {
 	ASR_Forms.GetOrganismList();	
 	jQuery("#edit-alignement-organisms").change(function() { ASR_Forms.GetRetrotransposonsList(jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
 	jQuery("#edit-alignement-retrotransposons").change(function() { ASR_Forms.GetRetrotransposonsPortionList(jQuery("#edit-alignement-organisms").val(), jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
-	//jQuery('#1').click(function() {alert('kuku');/*ASR_Forms.GetArchiveResult(this.id);*/}); 
 });

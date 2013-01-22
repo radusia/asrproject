@@ -46,8 +46,7 @@ th.headerSortDown {
     background-image: url(/misc/desc.gif); 
     /*background-color: #3399FF; */
 }
-th.header { 
-   // background-image: url(../img/small.gif);     
+th.header {    
     cursor: pointer; 
     font-weight: bold; 
     background-repeat: no-repeat; 
@@ -55,4 +54,7 @@ th.header {
     padding-left: 20px; 
     border-right: 1px solid #dad9c7; 
     margin-left: -1px; 
-} 
+}
+#box, #result {
+	width: 100%;
+}
