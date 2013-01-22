@@ -1,6 +1,8 @@
 <?php
 
-
+/**
+ * Implementation of hook_init().
+ */
 function asr_archive_init() {
 	drupal_add_css(drupal_get_path('module', 'asr_forms').'/css/asr_forms.css');
 }
@@ -12,9 +14,9 @@ function asr_archive_menu() {
   
   $items = array(); 
   $items['asr_archive/search'] = array(
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_CALLBACK,
     'title' => 'ASR Archive',
-  		'description' => 'ASR Archive Search',
+  	'description' => 'ASR Archive Search',
   	'page callback' => 'drupal_get_form',
   	'page arguments' => array('asr_archive_search_form'),
   	'access callback' => 'user_access',
@@ -28,14 +30,17 @@ function asr_archive_menu() {
       'page arguments' => array(2),
       'access callback' => 'user_access',
       'access callback' => TRUE,
-  );
-  
+  );  
   
   return $items;
 }
+
 /**
- * get archived data by archive id
- * @param  id 
+ * Get all chunks of archived data by alignement_uid
+ * And return HTML of result in table
+ * @param int alignement_uid 
+ * 
+ * @return string  - html result from theme()
  */
 function display_archive_result($arg){
   $result_id = strip_tags(isset($arg) ? $arg : 0);
@@ -48,7 +53,10 @@ function display_archive_result($arg){
   echo asr_forms_alignement_result($res_arr);
 }
 
-//implementation form for searching alignments
+/**
+ * Implementation form for searching alignments
+ * Implementation of hook_form().
+ */
 function asr_archive_search_form($form, &$form_state){
 	drupal_add_js('misc/jquery.tablesorter.js');
 	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
@@ -98,8 +106,8 @@ function asr_archive_search_form($form, &$form_state){
       '#prefix' => '<div style="float:left;">',
       '#suffix' => '</div></div>',
       '#attributes' => array('style' => "margin-top: 17px;"),
-    '#type' => 'submit',
-    '#ajax' => array(
+      '#type' => 'submit',
+      '#ajax' => array(
       'callback' => 'asr_archive_submit_driven_callback',
       'wrapper' => 'box',
       'name' => 'submit1',
@@ -127,20 +135,30 @@ function asr_archive_search_form($form, &$form_state){
   );
 	return $form;
 }
+
+/**
+ * Implementation of date calendar form element
+ * Implementation date calendar hooks
+ */
 function asr_archive_element_info_alter(&$type) {
   if (isset($type['date_popup'])) {
     $type['date_popup']['#process'][] = 'asr_archive_date_popup_process';
   }
 }
 
-function asr_archive_date_popup_process($element, $form_state, $complete_form) {
-  
+function asr_archive_date_popup_process($element, $form_state, $complete_form) {  
   unset($element['date']['#description']);
   unset($element['date']['#title']);
   return $element;
 }
 
-//get archived list of current user
+/**
+ * AJAX callback function for archive form
+ * Select the 'box' element, change the markup in it, and return it as a
+ * renderable array.
+ *
+ * @return renderable array (the box element)
+ */
 function asr_archive_submit_driven_callback($form, $form_state) {
   global $user;
   $user_id = $user->uid;
@@ -154,7 +172,7 @@ function asr_archive_submit_driven_callback($form, $form_state) {
   else { // submit alignement algorithms
     $where = 'WHERE ';
     if(!empty($form_state['input']['algnement_name']))
-       $where .= 'alignement = \''.$form_state['input']['algnement_name'].'\'';
+       $where .= 'alignement LIKE \'%'.$form_state['input']['algnement_name'].'%\'';
     if(!empty($form_state['input']['to']['date']))
         $date_to = $form_state['input']['to']['date'];
     if(!empty($form_state['input']['from']['date']))
@@ -200,8 +218,9 @@ function asr_archive_submit_driven_callback($form, $form_state) {
   $element['#suffix'] = '</div>';
   return $element;
 }
+
 /**
- validation of search form 
+ * Implementation of hook_form_validate().
  */
 function asr_archive_search_form_validate($form, $form_state) {
   $error = "";
@@ -211,6 +230,7 @@ function asr_archive_search_form_validate($form, $form_state) {
  
   return $error;
 }
+
 /**
  * Display/hide of error in search form
  * @param  string    $error - in case of error, otherwise empty to hide previous errors

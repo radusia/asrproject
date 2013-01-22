@@ -60,6 +60,3 @@ function asr_archive_schema() {
   );
   return $schema;
 }
-
-
-
