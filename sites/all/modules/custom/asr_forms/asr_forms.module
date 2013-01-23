@@ -56,8 +56,8 @@ function asr_forms_menu() {
   
   $items['asr_forms/sequence_alignement'] = array(
     'type' => MENU_CALLBACK,
-    'title' => 'ASR Alignement',
-  	'description' => 'ASR Alignement Forms.',
+    'title' => 'ASR Alignment',
+  	'description' => 'ASR Alignment Forms.',
   	'page callback' => 'drupal_get_form',
   	'page arguments' => array('asr_forms_sequence_alignement_form'),
   	'access callback' => 'user_access',
@@ -66,8 +66,8 @@ function asr_forms_menu() {
 
   $items['asr_forms/sequence_alignement_async'] = array(
   		'type' => MENU_CALLBACK,
-  		'title' => 'ASR Alignement',
-  		'description' => 'ASR Alignement Forms.',
+  		'title' => 'ASR Alignment',
+  		'description' => 'ASR Alignment Forms.',
   		'page callback' => 'drupal_get_form',
   		'page arguments' => array('asr_forms_sequence_alignement_form_async'),
   		'access callback' => 'user_access',
@@ -99,8 +99,8 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 	
 	$form['asr_alignement']['algnement_name'] = array(
 			'#type' => 'textfield',
-			'#title' => t('Alignement Name'),
-			'#description' => t('Enter Alignement Name. Give unique name according to DNA sequence which can be used in alignement history later.'),
+			'#title' => t('Alignment Name'),
+			'#description' => t('Enter Alignment Name. Give unique name according to DNA sequence which can be used in alignement history later.'),
 			'#required' => TRUE,
 	);
 	
@@ -108,7 +108,7 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#type' => 'file',
 			'#title' => t('File Path'),
 			'#size' => 60,
-			'#description' => t('Upload DNA sequence for alignement in <a href="" target="_blank">correct format</a>.'),
+			'#description' => t('Upload DNA sequence for alignment in <a href="" target="_blank">correct format</a>.'),
 			'#required' => TRUE,
 	);
 		
@@ -142,15 +142,15 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#type' => 'select',
 			'#options' => build_select_arr(ASR_FORMS_SEGMENT_MIN, ASR_FORMS_SEGMENT_MAX, ASR_FORMS_SEGMENT_INTERVAL),
 			'#title' => t('Segment Length'),
-			'#description' => t('Select slice length you want to use for your sequence alignement.'),
+			'#description' => t('Select slice length you want to use for your sequence alignment.'),
 			'#required' => FALSE,
 	);
 	
 	$form['asr_alignement']['alignement_threshold'] = array(
 			'#type' => 'select',
 			'#options' => build_select_arr(ASR_FORMS_THRESHOLD_MIN, ASR_FORMS_THRESHOLD_MAX, ASR_FORMS_THRESHOLD_INTERVAL),
-			'#title' => t('Alignement Threshold'),
-			'#description' => t('Select threshold value for sequence alignement (the value is in %).'),
+			'#title' => t('Alignment Threshold'),
+			'#description' => t('Select threshold value for sequence alignment (the value is in %).'),
 			'#required' => FALSE,
 			'#default_value' => 50,
 	);
@@ -177,7 +177,7 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 			'#type' => 'textfield',
 			//'#options' => build_select_arr(ASR_FORMS_COST_GAP_MIN, ASR_FORMS_COST_GAP_MAX, 1),
 			'#title' => t('Min Local Alignment Score Matrix '),
-			'#description' => t('Insert minimum local alignements cost.'),
+			'#description' => t('Insert minimum local alignments cost.'),
 			'#required' => TRUE,
 			'#default_value' => 100,
 	);
@@ -188,7 +188,7 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 							    'alignement_align_ok' => t('Return Only Local Align Ok'),
 							    'alignement_shuffeled_sequence' => t('Check Result With Shuffeled Sequence')),
 			'#title' => t('Alignemet Options'),
-			//'#description' => t('Select threshold value for sequence alignement (the value is in %).'),
+			//'#description' => t('Select threshold value for sequence alignment (the value is in %).'),
 			'#required' => FALSE,
 	);
 	
@@ -229,8 +229,8 @@ function asr_forms_sequence_alignement_form_async($form, &$form_state) {
 
 	$form['asr_alignement']['algnement_name'] = array(
 			'#type' => 'textfield',
-			'#title' => t('Alignement Name'),
-			'#description' => t('Enter Alignement Name. Give unique name according to DNA sequence which can be used in alignement history later.'),
+			'#title' => t('Alignment Name'),
+			'#description' => t('Enter Alignment Name. Give unique name according to DNA sequence which can be used in alignement history later.'),
 			'#required' => TRUE,
 	);
 
@@ -238,7 +238,7 @@ function asr_forms_sequence_alignement_form_async($form, &$form_state) {
 			'#type' => 'file',
 			'#title' => t('File Path'),
 			'#size' => 60,
-			'#description' => t('Upload DNA sequence for alignement in <a href="" target="_blank">correct format</a>.'),
+			'#description' => t('Upload DNA sequence for alignment in <a href="" target="_blank">correct format</a>.'),
 			'#required' => TRUE,
 	);
 
@@ -272,15 +272,15 @@ function asr_forms_sequence_alignement_form_async($form, &$form_state) {
 			'#type' => 'select',
 			'#options' => build_select_arr(ASR_FORMS_SEGMENT_MIN, ASR_FORMS_SEGMENT_MAX, ASR_FORMS_SEGMENT_INTERVAL),
 			'#title' => t('Segment Length'),
-			'#description' => t('Select slice length you want to use for your sequence alignement.'),
+			'#description' => t('Select slice length you want to use for your sequence alignment.'),
 			'#required' => FALSE,
 	);
 
 	$form['asr_alignement']['alignement_threshold'] = array(
 			'#type' => 'select',
 			'#options' => build_select_arr(ASR_FORMS_THRESHOLD_MIN, ASR_FORMS_THRESHOLD_MAX, ASR_FORMS_THRESHOLD_INTERVAL),
-			'#title' => t('Alignement Threshold'),
-			'#description' => t('Select threshold value for sequence alignement (the value is in %).'),
+			'#title' => t('Alignment Threshold'),
+			'#description' => t('Select threshold value for sequence alignment (the value is in %).'),
 			'#required' => FALSE,
 			'#default_value' => 50,
 	);
@@ -318,7 +318,7 @@ function asr_forms_sequence_alignement_form_async($form, &$form_state) {
 					'alignement_align_ok' => t('Return Only Local Align Ok'),
 					'alignement_shuffeled_sequence' => t('Check Result With Shuffeled Sequence')),
 			'#title' => t('Alignemet Options'),
-			//'#description' => t('Select threshold value for sequence alignement (the value is in %).'),
+			//'#description' => t('Select threshold value for sequence alignment (the value is in %).'),
 			'#required' => FALSE,
 	);
 
@@ -352,7 +352,7 @@ function asr_forms_sequence_alignement_form_validate($form, $form_state) {
 		$error = array('error' => t('Illegal characters in file for alignment.'), 'field' => 'alignement-file');
 	}		 
 	else if(empty($form_state['values']['alignement_organisms'])) {
-		$error = array('error' => t('Please select organism for alignement'), 'field' => 'alignement-organisms');
+		$error = array('error' => t('Please select organism for alignment'), 'field' => 'alignement-organisms');
 	}
 	else if(empty($form_state['values']['alignement_retrotransposons'])) {
 		$error = array('error' => t('Please select retrotransposon for alignment'), 'field' => 'alignement-retrotransposons');
@@ -368,7 +368,7 @@ function asr_forms_sequence_alignement_form_validate($form, $form_state) {
 }
 
 /**
- * AJAX callback function for alignement form
+ * AJAX callback function for alignment form
  * Select the 'box' element, change the markup in it, and return it as a
  * renderable array.
  *
@@ -382,7 +382,7 @@ function asr_forms_submit_driven_callback($form, $form_state) {
 	if(!empty($error)) {		
 		$element['#markup'] = asr_forms_error_script($error['error'], $error['field']);
 	}
-	else { // submit alignement algorithms
+	else { // submit alignment algorithms
 		$string = remove_break_lines(file_get_contents($_FILES['files']['tmp_name']['alignement_file']));
 		$string_chunks_arr = chunk_string_to_array($string, ASR_FORMS_CHUNK_LENGTH);
 		$alignement_uid =  generate_uuid();

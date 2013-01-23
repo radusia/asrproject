@@ -12,7 +12,7 @@ function asr_archive_uninstall() {
 function asr_archive_schema() {
 
   $schema['asr_archive'] = array(
-    'description' => t('ASR Archive of alignements per user/date/alignement name'),
+    'description' => t('ASR Archive of alignments per user/date/alignment name'),
     'fields' => array(
       'id' => array(
         'description' => t('The primary identifier'),
@@ -50,7 +50,7 @@ function asr_archive_schema() {
         'default' => 1,
       ),
       'result' => array(
-        'description' => t('Serialized alignement result'),
+        'description' => t('Serialized alignment result'),
         'type' => 'blob',
         'size' => 'big',
         'not null' => FALSE,

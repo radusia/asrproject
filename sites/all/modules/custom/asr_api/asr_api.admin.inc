@@ -8,7 +8,7 @@ function asr_api_admin_settings_form($form, &$form_state) {
  	$form['wsdl_settings'] = array(
     	'#type' => 'fieldset',
  		'#title' => t('WSDL Settings'),
- 		'#description' => t('Define web service settings for alignement form usage'),
+ 		'#description' => t('Define web service settings for alignment form usage'),
   	); 	
  	$form['wsdl_settings']['wsdl_url'] = array(
  			'#type' => 'textfield',

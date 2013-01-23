@@ -80,18 +80,33 @@
 	  if(jQuery("#"+id).is('.collapsed')) {
 		  jQuery("#"+id).removeClass('collapsed');
 		  var lines = '';
+		  var styled_asr_seq = '';
+		  var styled_sub_seq = '';
 		  var patt=/a|c|g|t|-/;
 		  jQuery.each(ASRSequence, function(index) {
-			  if(this == GenSubSequence[index] && patt.test(GenSubSequence[index]) == true)
+			  if(this == GenSubSequence[index] && patt.test(GenSubSequence[index]) == true) {
 				  lines += '|';
-			  else lines += '&nbsp;';
+				  class_name = 'red';				 
+			  }
+			  else {
+				  if(patt.test(GenSubSequence[index]) == true) {
+					  if(ASRSequence[index] == '-' || GenSubSequence[index] == '-')
+						  class_name = 'green';
+					  else class_name = 'blue';
+				  }
+				  else class_name = 'black';
+				  lines += '&nbsp;';
+			  }
+			  styled_asr_seq += '<span class="'+class_name+'">'+ASRSequence[index]+'</span>';
+			  styled_sub_seq += '<span class="'+class_name+'">'+GenSubSequence[index]+'</span>';
 		  });
-		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>ASRSequence</td><td colspan="4">'+ASRSequence+'</td></tr>');
+		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>ASRSequence</td><td colspan="4">'+styled_asr_seq+'</td></tr>');
 		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>&nbsp;</td><td colspan="4">'+lines+'</td></tr>');
-		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>GenSubSequence</td><td colspan="4">'+GenSubSequence+'</td></tr>');
+		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>GenSubSequence</td><td colspan="4">'+styled_sub_seq+'</td></tr>');
 	  }
 	  else {
 		  jQuery("#"+id).addClass('collapsed');
+		  jQuery("#"+id).parent().next().remove();
 		  jQuery("#"+id).parent().next().remove();
 		  jQuery("#"+id).parent().next().remove();
 	  }

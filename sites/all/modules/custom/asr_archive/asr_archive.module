@@ -63,7 +63,7 @@ function asr_archive_search_form($form, &$form_state){
 	drupal_add_js('misc/collapse.js');
 	$form['asr_alignement'] = array(
 			'#type' => 'fieldset',
-			'#title' => t('Search Alignement'),
+			'#title' => t('Search Alignment'),
 	);
 	
 	$form['asr_alignement']['error'] = array(
@@ -77,7 +77,7 @@ function asr_archive_search_form($form, &$form_state){
 	        '#suffix' => '</div>',
 	        '#attributes' => array('style' => "width:150px;"),
 			'#type' => 'textfield',
-			'#title' => t('Alignement Name'),
+			'#title' => t('Alignment Name'),
 	);
 	
 	$form['asr_alignement']['from'] = array(
@@ -228,7 +228,7 @@ function asr_archive_submit_driven_callback($form, $form_state) {
 function asr_archive_search_form_validate($form, $form_state) {
   $error = "";
   if(empty($form_state['values']['algnement_name']) && empty($form_state['values']['from']) && empty($form_state['values']['to'])) {
-    $error = array('error' => t('Please specify name for alignement or from date and to date '), 'field' => 'algnement-name');
+    $error = array('error' => t('Please specify name for alignment or from date and to date '), 'field' => 'algnement-name');
   }
  
   return $error;

@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Sequence alignement - admin settings form
+ * Sequence alignment - admin settings form
  * Implementation of hook_form().
  */
 function asr_forms_admin_settings_form($form, &$form_state) {
  	$form['threshold_settings'] = array(
     	'#type' => 'fieldset',
- 		'#title' => t('Alignement Form Threshold Settings'),
+ 		'#title' => t('Alignment Form Threshold Settings'),
  		'#description' => t('Define minimum and maximum values for threshold select field in alignment form'),
   	);
  	$form['threshold_settings']['threshold_min'] = array(
@@ -28,7 +28,7 @@ function asr_forms_admin_settings_form($form, &$form_state) {
  	
  	$form['segment_settings'] = array(
  			'#type' => 'fieldset',
- 			'#title' => t('Alignement Form Segment Settings'),
+ 			'#title' => t('Alignment Form Segment Settings'),
  			'#description' => t('Define minimum and maximum for segment length select in alignment form'),
  	);
  	$form['segment_settings']['segment_length_min'] = array(
