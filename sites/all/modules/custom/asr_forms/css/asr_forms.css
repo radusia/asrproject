@@ -17,6 +17,9 @@
 #edit-alignement-segment-length, #edit-alignement-threshold {
 	width: 60px;
 }
+#edit-alignement-min-local-cost {
+	width: 100px;
+}
 .txt_red {
 	color: red;
 	font-weight: bold;
@@ -36,7 +39,10 @@ td.collapsed {
 }
 tr.collapsedrow {
 	background-color: #FFFFFF;
+	font-family: Courier, "Courier New", monospace;
+	line-height: 5px;
 }
+/*div.fixedwidth { font-family: Courier, "Courier New", monospace }*/
 /*end - Alignement form css*/
 th.headerSortUp { 
     background-image: url(/misc/asc.gif); 

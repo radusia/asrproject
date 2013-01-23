@@ -63,7 +63,7 @@
   //Archive result
   ASR_Forms.GetArchiveResult = function(id) {
 	  $('#result').load('/asr_archive/archive_result/'+id, function() {
-		  alert('Load was performed.');
+		  //alert('Load was performed.');
 	  });
   };
   
@@ -79,7 +79,15 @@
   ASR_Forms.toggleCollapse = function(id, ASRSequence, GenSubSequence) {
 	  if(jQuery("#"+id).is('.collapsed')) {
 		  jQuery("#"+id).removeClass('collapsed');
+		  var lines = '';
+		  var patt=/a|c|g|t|-/;
+		  jQuery.each(ASRSequence, function(index) {
+			  if(this == GenSubSequence[index] && patt.test(GenSubSequence[index]) == true)
+				  lines += '|';
+			  else lines += '&nbsp;';
+		  });
 		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>ASRSequence</td><td colspan="4">'+ASRSequence+'</td></tr>');
+		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>&nbsp;</td><td colspan="4">'+lines+'</td></tr>');
 		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>GenSubSequence</td><td colspan="4">'+GenSubSequence+'</td></tr>');
 	  }
 	  else {
@@ -99,6 +107,16 @@
    ASR_Forms.tableSorter = function(id) {
 	jQuery(".sticky-enabled").tablesorter({ sortList:[[1,0],[2,0],[3,0]] , headers: { 0: { sorter: false}, 4: {sorter: false} }});
 	jQuery(".header").mouseup(function() { ASR_Forms.initCollapse(); });
+	jQuery('.sticky-enabled > tbody  > tr').each(function(index) {
+		if(index%2 == 1 && this.hasClass("even")) { //odd
+			this.removeClass("even");
+			this.addClass("odd");
+		}
+		else if(index%2 == 0 && this.hasClass("odd")) { //even
+			this.removeClass("odd");
+			this.addClass("even");
+		}
+	});
   };
 
 })(jQuery);

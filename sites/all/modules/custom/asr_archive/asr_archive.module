@@ -164,7 +164,7 @@ function asr_archive_submit_driven_callback($form, $form_state) {
   $user_id = $user->uid;
   $messages = drupal_get_messages();
   $element = $form['result']['box'];
-
+  
   $error = asr_archive_search_form_validate($form, $form_state);
   if(!empty($error)) {
     $element['#markup'] = asr_archive_error_script($error['error'], $error['field']);
@@ -213,7 +213,10 @@ function asr_archive_submit_driven_callback($form, $form_state) {
    	  	}
    }
   }
-  $element['#markup'] = $result_table;
+  $script = '<script type="text/javascript">
+				jQuery(\'#result\').html(\'\');
+			</script>';
+  $element['#markup'] = $script.$result_table;
   $element['#prefix'] = '<div id="box">';
   $element['#suffix'] = '</div>';
   return $element;

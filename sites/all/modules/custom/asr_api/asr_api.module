@@ -225,10 +225,10 @@ function GetRetrotransposonsPortionList(){
 	
 	$var_key = 'GetRetrotransposonsPortionList_oid'.$OrganismId.'_rid'.$RetrotransposonsId;
 	
-	if(variable_get($var_key, null) != null) {
+	/*if(variable_get($var_key, null) != null) {
 		_output_json_response(variable_get($var_key, null));
 		return;
-	}
+	}*/
 	
 	$params = array('input' => array('OrganismId' => $OrganismId, 'RetrotransposonsId' => $RetrotransposonsId));
 

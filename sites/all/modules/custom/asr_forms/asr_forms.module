@@ -20,7 +20,6 @@ define('ASR_FORMS_CHUNK_LENGTH',  variable_get('sequence_chunk_length', 5000));
  * Implementation of hook_init().
  */
 function asr_forms_init() {
-	//drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
 	drupal_add_css(drupal_get_path('module', 'asr_forms').'/css/asr_forms.css');
 }
 
@@ -175,12 +174,12 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 	);
 	
 	$form['asr_alignement']['alignement_min_local_cost'] = array(
-			'#type' => 'select',
-			'#options' => build_select_arr(ASR_FORMS_COST_GAP_MIN, ASR_FORMS_COST_GAP_MAX, 1),
+			'#type' => 'textfield',
+			//'#options' => build_select_arr(ASR_FORMS_COST_GAP_MIN, ASR_FORMS_COST_GAP_MAX, 1),
 			'#title' => t('Min Local Alignment Score Matrix '),
-			'#description' => t('Select minimum local alignements cost.'),
-			'#required' => FALSE,
-			'#default_value' => 0,
+			'#description' => t('Insert minimum local alignements cost.'),
+			'#required' => TRUE,
+			'#default_value' => 100,
 	);
 	
 	$form['asr_alignement']['alignement_options'] = array(
@@ -349,7 +348,7 @@ function asr_forms_sequence_alignement_form_validate($form, $form_state) {
 	else if(empty($_FILES['files']['tmp_name']['alignement_file'])) {
 		$error = array('error' => t('Please upload file for alignment'), 'field' => 'alignement-file');
 	}
-	else if (preg_match('/[^actg]+/', file_get_contents($_FILES['files']['tmp_name']['alignement_file']), $matches)) {
+	else if (preg_match('/[^actg]+/', remove_break_lines(file_get_contents($_FILES['files']['tmp_name']['alignement_file'])), $matches)) {
 		$error = array('error' => t('Illegal characters in file for alignment.'), 'field' => 'alignement-file');
 	}		 
 	else if(empty($form_state['values']['alignement_organisms'])) {
@@ -361,6 +360,10 @@ function asr_forms_sequence_alignement_form_validate($form, $form_state) {
 	else if(empty($form_state['values']['alignement_retrotransposons_portion'])) {
 		$error = array('error' => t('Please select at least one retrotransposons portion for alignment'), 'field' => 'alignement-retrotransposons-portion');
 	}
+	else if(!is_numeric($form_state['values']['alignement_min_local_cost'])) {
+		$error = array('error' => t('Please insert numeric value for alignment minimum local cost matrix'), 'field' => 'alignement-min-local-cost');
+	}
+	
 	return $error;
 }
 
@@ -380,7 +383,7 @@ function asr_forms_submit_driven_callback($form, $form_state) {
 		$element['#markup'] = asr_forms_error_script($error['error'], $error['field']);
 	}
 	else { // submit alignement algorithms
-		$string = file_get_contents($_FILES['files']['tmp_name']['alignement_file']);
+		$string = remove_break_lines(file_get_contents($_FILES['files']['tmp_name']['alignement_file']));
 		$string_chunks_arr = chunk_string_to_array($string, ASR_FORMS_CHUNK_LENGTH);
 		$alignement_uid =  generate_uuid();
 		$out_result = $out_error = '';
@@ -421,6 +424,7 @@ function asr_forms_submit_driven_callback($form, $form_state) {
 }
 
 function chunk_string_to_array($string, $chunk_len = ASR_FORMS_CHUNK_LENGTH, $end = "\r\n") {
+	//remove extra line breaks in file
 	$alignement_file_chunks = chunk_split($string, $chunk_len, $end);	
 	$alignement_file_chunks_arr = explode($end, $alignement_file_chunks);
 	//echo "<pre>";
@@ -428,6 +432,10 @@ function chunk_string_to_array($string, $chunk_len = ASR_FORMS_CHUNK_LENGTH, $en
 	return $alignement_file_chunks_arr;
 }
 	
+function remove_break_lines($string) {
+	return str_replace(array("\r\n", "\n", "\r"), '', $string);
+}
+
 /**
  * Display/hide of error in alignement form
  * @param  string    $error - in case of error, otherwise empty to hide previous errors
@@ -505,9 +513,9 @@ function asr_forms_wrap_result($result) {
 				//$out .= asr_forms_wrap_result($value->RepeatsMatch->RepeatMatch, $value->RetrotransposonsPortion);
 				$RepeatMatch = $value->RepeatsMatch->RepeatMatch;
 			    $RetrotransposonsPortion = $value->RetrotransposonsPortion;
-			    watchdog('DEBUG - result1', print_r($RepeatMatch,1));
+			    //watchdog('DEBUG - result1', print_r($RepeatMatch,1));
 			    $RepeatMatch = is_array($RepeatMatch)? $RepeatMatch : array($RepeatMatch);
-			    watchdog('DEBUG - result2', print_r($RepeatMatch,1));
+			    //watchdog('DEBUG - result2', print_r($RepeatMatch,1));
 			    foreach($RepeatMatch as $key => $value) {
 			    	$item_id = "collapsible".$RetrotransposonsPortion->Name.$count;
 			    	$rows [] = array(
@@ -516,8 +524,8 @@ function asr_forms_wrap_result($result) {
 			    					'id' => $item_id,
 			    					'alt' => $RetrotransposonsPortion->Repeat),
 			    			array('data' => $value->LocalAlignmentResult->Score),
-			    			array('data' => $value->StartOffset),
-			    			array('data' => $value->EndOffset),
+			    			array('data' => $value->SubstringAlignedSequence->StartOffset),
+			    			array('data' => $value->SubstringAlignedSequence->EndOffset),
 			    			array('data' => $value->LocalAlignmentStatus),
 			    	);
 			    	$count++;
@@ -525,48 +533,9 @@ function asr_forms_wrap_result($result) {
 		}
 	
 	}
-	
-	$AlignResult_table = theme('table', array('header' => $header, 'rows' => $rows, 'class' => 'sticky-table'));
+	if(!empty($rows))
+		$AlignResult_table = theme('table', array('header' => $header, 'rows' => $rows, 'class' => 'sticky-table'));
 	return $AlignResult_table;
-	
-	/*if(!empty($value->LoaclAlignmentResult)) {
-		$header1 = array(
-				array('data' => t('Loacl Alignment Result'), 'colspan' => 2)
-		);
-		
-		$rows1 [] = array(
-				array('data' => t('Gene Sequence Length')),
-				array('data' => $value->LoaclAlignmentResult->GeneSequenceLength),
-		);
-		$rows1 [] = array(
-				array('data' => t('GeneSequenceStartOffset')),
-				array('data' => $value->LoaclAlignmentResult->GeneSequenceStartOffset),
-		);
-		
-		$rows1 [] = array(
-			array('data' => t('Aligned ASR Sequence')),
-			array('data' => $value->LoaclAlignmentResult->AlignedASRSequence),
-		);
-		
-		$rows1 [] = array(
-				array('data' => t('Aligned Gene Sequence')),
-				array('data' => $value->LoaclAlignmentResult->AlignedGeneSequence),
-		);
-		$LoaclAlignmentResult_table = theme('table', array('header' => $header1, 'rows' => $rows1));
-		
-	}
-	
-	$title_class = ($value->AlignWordStatus == 'AlignOk')?'txt_green':'txt_red'; 
-	
-	$current_fieldset = array(
-			'#title' => '<span class="'.$title_class.'">'.$value->RetrotransposonsPortion->Name.'</span>',
-			'#collapsible' => true,
-			'#collapsed' => $collapsed,
-			'#attributes'  => array( 'class' => (!$collapsed ? array('collapsible', 'collapsed'):array('collapsible')) ),
-			'#children' => 'Repeat: '.$value->RetrotransposonsPortion->Repeat,
-			'#value' => $ExactMatchAlignResult_table. $LoaclAlignmentResult_table);
-	return theme('fieldset', array('element' => $current_fieldset));
-	*/
 }
 
 /**
