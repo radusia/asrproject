@@ -50,6 +50,8 @@ function display_archive_result($arg){
   while ($row = $result->fetchAssoc()){
      $res_arr[] = unserialize(gzuncompress(base64_decode($row['result'])));
   }
+ // echo "<pre>";
+ // print_r($res_arr);
   echo asr_forms_alignement_result($res_arr);
 }
 

@@ -470,13 +470,14 @@ function asr_forms_error_script($error = '', $field = '') {
  */
 function asr_forms_alignement_result($result_arr) {
 	$out = ''; 
-	foreach($result_arr as $key => $result) {
+	/*foreach($result_arr as $key => $result) {
 		if(isset($result->ASRAlignResult->RetrotransposonsPortionAlignResult)) {
 			$list = $result->ASRAlignResult->RetrotransposonsPortionAlignResult;
 			$list = is_array($list)?$list:array($list);			
 			$out = asr_forms_wrap_result($list);
 		}
-	}
+	}*/
+	$out = asr_forms_wrap_result($result_arr);
 	$script = '<script type="text/javascript">
 			setTimeout( function() { ASR_Forms.tableSorter(); } , 1000);
 			</script>
@@ -492,7 +493,7 @@ function asr_forms_alignement_result($result_arr) {
  *
  * @return string    $result_html - result from theme()
  */
-function asr_forms_wrap_result($result) {		
+function asr_forms_wrap_result($result_arr) {		
 	$AlignResult_table = '';
 	$count = 0;
 	$header = array();
@@ -505,34 +506,45 @@ function asr_forms_wrap_result($result) {
 			array('data' => t('End Offset')),
 			array('data' => t('Local Alignment Status')),);
 	
-	foreach ($result as $value) {
-		//echo "<pre>";
-		//print_r($value,1);
-		//return;
-		if(isset($value->RepeatsMatch) && isset($value->RepeatsMatch->RepeatMatch)) {
-				//$out .= asr_forms_wrap_result($value->RepeatsMatch->RepeatMatch, $value->RetrotransposonsPortion);
-				$RepeatMatch = $value->RepeatsMatch->RepeatMatch;
-			    $RetrotransposonsPortion = $value->RetrotransposonsPortion;
-			    //watchdog('DEBUG - result1', print_r($RepeatMatch,1));
-			    $RepeatMatch = is_array($RepeatMatch)? $RepeatMatch : array($RepeatMatch);
-			    //watchdog('DEBUG - result2', print_r($RepeatMatch,1));
-			    foreach($RepeatMatch as $key => $value) {
-			    	$item_id = "collapsible".$RetrotransposonsPortion->Name.$count;
-			    	$rows [] = array(
-			    			array('data' => '<span onclick="ASR_Forms.toggleCollapse(\''.$item_id.'\', \''.$value->LocalAlignmentResult->ASRSequence.'\', \''.$value->LocalAlignmentResult->GenSubSequence.'\');">'.$RetrotransposonsPortion->Name.'</span>',
-			    					'class' => 'collapsible collapsed',
-			    					'id' => $item_id,
-			    					'alt' => $RetrotransposonsPortion->Repeat),
-			    			array('data' => $value->LocalAlignmentResult->Score),
-			    			array('data' => $value->SubstringAlignedSequence->StartOffset),
-			    			array('data' => $value->SubstringAlignedSequence->EndOffset),
-			    			array('data' => $value->LocalAlignmentStatus),
-			    	);
-			    	$count++;
-			    }
+	foreach($result_arr as $key => $result) {
+		if(isset($result->ASRAlignResult->RetrotransposonsPortionAlignResult)) {
+			$list = $result->ASRAlignResult->RetrotransposonsPortionAlignResult;
+			$list = is_array($list)?$list:array($list);
+			//$out = asr_forms_wrap_result($list);
+			
+			foreach ($list as $value) {
+				//echo "<pre>";
+				//print_r($value,1);
+				//return;
+				if(isset($value->RepeatsMatch) && isset($value->RepeatsMatch->RepeatMatch)) {
+					//$out .= asr_forms_wrap_result($value->RepeatsMatch->RepeatMatch, $value->RetrotransposonsPortion);
+					$RepeatMatch = $value->RepeatsMatch->RepeatMatch;
+					$RetrotransposonsPortion = $value->RetrotransposonsPortion;
+					//watchdog('DEBUG - result1', print_r($RepeatMatch,1));
+					$RepeatMatch = is_array($RepeatMatch)? $RepeatMatch : array($RepeatMatch);
+					//watchdog('DEBUG - result2', print_r($RepeatMatch,1));
+					foreach($RepeatMatch as $key => $value) {
+						$item_id = "collapsible".$RetrotransposonsPortion->Name.$count;
+						$rows [] = array(
+								array('data' => '<span onclick="ASR_Forms.toggleCollapse(\''.$item_id.'\', \''.$value->LocalAlignmentResult->ASRSequence.'\', \''.$value->LocalAlignmentResult->GenSubSequence.'\');">'.$RetrotransposonsPortion->Name.'</span>',
+										'class' => 'collapsible collapsed',
+										'id' => $item_id,
+										'alt' => $RetrotransposonsPortion->Repeat),
+								array('data' => $value->LocalAlignmentResult->Score),
+								array('data' => $value->SubstringAlignedSequence->StartOffset),
+								array('data' => $value->SubstringAlignedSequence->EndOffset),
+								array('data' => $value->LocalAlignmentStatus),
+						);
+						$count++;
+					}
+				}
+			
+			}
+			
 		}
-	
 	}
+	
+
 	if(!empty($rows))
 		$AlignResult_table = theme('table', array('header' => $header, 'rows' => $rows, 'class' => 'sticky-table'));
 	return $AlignResult_table;
