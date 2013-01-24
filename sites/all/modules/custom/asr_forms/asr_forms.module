@@ -1,6 +1,8 @@
 <?php
 
+
 /**
+ *
  * @file
  * ASR Forms module
  */
@@ -479,7 +481,10 @@ function asr_forms_alignement_result($result_arr) {
 	}*/
 	$out = asr_forms_wrap_result($result_arr);
 	$script = '<script type="text/javascript">
-			setTimeout( function() { ASR_Forms.tableSorter(); } , 1000);
+			setTimeout( function() { ASR_Forms.tabsContainer();
+									 ASR_Forms.tableSorter("result-table"); 
+					                 ASR_Forms.tableSorter("result-table-shuffled"); 
+			} , 1000);
 			</script>
 			';
 			
@@ -494,14 +499,16 @@ function asr_forms_alignement_result($result_arr) {
  * @return string    $result_html - result from theme()
  */
 function asr_forms_wrap_result($result_arr) {		
-	$AlignResult_table = '';
-	$count = 0;
+	$AlignResult_table = $AlignResult_tableShuffled = '';
+	$count = $countShuffled = 0;
 	$header = array();
-	$rows = array();
-
+	$rows = $rowsShuffled = array();
+    $scores_arr = $scores_arrShuffled = array();
+    
 	$header = array(
 			array('data' => t('Repeat Name')),
 			array('data' => t('Score')),
+			array('data' => t('Substring Length')),
 			array('data' => t('Start Offset')),
 			array('data' => t('End Offset')),
 			array('data' => t('Local Alignment Status')),);
@@ -523,32 +530,104 @@ function asr_forms_wrap_result($result_arr) {
 					//watchdog('DEBUG - result1', print_r($RepeatMatch,1));
 					$RepeatMatch = is_array($RepeatMatch)? $RepeatMatch : array($RepeatMatch);
 					//watchdog('DEBUG - result2', print_r($RepeatMatch,1));
-					foreach($RepeatMatch as $key => $value) {
+					foreach($RepeatMatch as $key => $value1) {
 						$item_id = "collapsible".$RetrotransposonsPortion->Name.$count;
 						$rows [] = array(
-								array('data' => '<span onclick="ASR_Forms.toggleCollapse(\''.$item_id.'\', \''.$value->LocalAlignmentResult->ASRSequence.'\', \''.$value->LocalAlignmentResult->GenSubSequence.'\');">'.$RetrotransposonsPortion->Name.'</span>',
+								array('data' => '<span onclick="ASR_Forms.toggleCollapse(\''.$item_id.'\', \''.$value1->LocalAlignmentResult->ASRSequence.'\', \''.$value1->LocalAlignmentResult->GenSubSequence.'\');">'.$RetrotransposonsPortion->Name.'</span>',
 										'class' => 'collapsible collapsed',
 										'id' => $item_id,
 										'alt' => $RetrotransposonsPortion->Repeat),
-								array('data' => $value->LocalAlignmentResult->Score),
-								array('data' => $value->SubstringAlignedSequence->StartOffset),
-								array('data' => $value->SubstringAlignedSequence->EndOffset),
-								array('data' => $value->LocalAlignmentStatus),
+								array('data' => $value1->LocalAlignmentResult->Score),
+								array('data' => $value1->SubstringAlignedSequence->SubstringLength),
+								array('data' => $value1->SubstringAlignedSequence->StartOffset),
+								array('data' => $value1->SubstringAlignedSequence->EndOffset),
+								array('data' => $value1->LocalAlignmentStatus),
 						);
 						$count++;
+						$scores_arr[] = $value1->LocalAlignmentResult->Score;
+					}
+				}
+				
+				if(isset($value->ShuffeledResult) && 
+				   isset($value->ShuffeledResult->RepeatsMatch) && 
+				   isset($value->ShuffeledResult->RepeatsMatch->RepeatMatch)) {
+					//$out .= asr_forms_wrap_result($value->RepeatsMatch->RepeatMatch, $value->RetrotransposonsPortion);
+					$RepeatMatchSuffled = $value->ShuffeledResult->RepeatsMatch->RepeatMatch;
+					$RetrotransposonsPortionSuffled = $value->RetrotransposonsPortion;
+					//watchdog('DEBUG - result1', print_r($RepeatMatch,1));
+					$RepeatMatchSuffled = is_array($RepeatMatchSuffled)? $RepeatMatchSuffled : array($RepeatMatchSuffled);
+					//watchdog('DEBUG - result2', print_r($RepeatMatch,1));
+					foreach($RepeatMatchSuffled as $key => $value2) {
+						$item_id = "collapsibleShuffled".$RetrotransposonsPortionSuffled->Name.$countSuffled;
+						$rowsSuffled [] = array(
+								array('data' => '<span onclick="ASR_Forms.toggleCollapse(\''.$item_id.'\', \''.$value2->LocalAlignmentResult->ASRSequence.'\', \''.$value2->LocalAlignmentResult->GenSubSequence.'\');">'.$RetrotransposonsPortionSuffled->Name.'</span>',
+										'class' => 'collapsible collapsed',
+										'id' => $item_id,
+										'alt' => $RetrotransposonsPortionSuffled->Repeat),
+								array('data' => $value2->LocalAlignmentResult->Score),
+								array('data' => $value2->SubstringAlignedSequence->SubstringLength),
+								array('data' => $value2->SubstringAlignedSequence->StartOffset),
+								array('data' => $value2->SubstringAlignedSequence->EndOffset),
+								array('data' => $value2->LocalAlignmentStatus),
+						);
+						$countSuffled++;
+						$scores_arrSuffled[] = $value2->LocalAlignmentResult->Score;
 					}
 				}
 			
 			}
 			
 		}
-	}
-	
+	}	
 
-	if(!empty($rows))
-		$AlignResult_table = theme('table', array('header' => $header, 'rows' => $rows, 'class' => 'sticky-table'));
-	return $AlignResult_table;
+	if(!empty($rows)) {
+		$fieldset_str = t('Amount:').count($scores_arr);
+		$fieldset_str .= t(' | Average: ').( array_sum($scores_arr) / count($scores_arr) );
+		$fieldset_str .= t(' | Deviation: ').standard_deviation($scores_arr);
+		
+		$fieldset_element = array('#title' => $fieldset_str,                      
+				'#children'    => '',
+				'#collapsible' => true,                       
+				'#collapsed'   => false,	
+				'#attributes' => array('class' => array('collapsible', 'collapsed', 'deviation'))			
+		);  
+		$fieldset = theme('fieldset', array('element' => $fieldset_element));
+		$AlignResult_table = '<div id="scrollWrapper" class="tab_content">'.$fieldset.theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('result-table')))).'</div>';
+	}
+	if(!empty($rowsSuffled)) {
+		$fieldset_str = t('Amount:').count($scores_arrSuffled);
+		$fieldset_str .= t(' | Average: ').( array_sum($scores_arrSuffled) / count($scores_arrSuffled) );
+		$fieldset_str .= t(' | Deviation: ').standard_deviation($scores_arrSuffled);
+		
+		$fieldset_element = array('#title' => $fieldset_str,
+				'#children'    => '',
+				'#collapsible' => true,
+				'#collapsed'   => false,
+				'#attributes' => array('class' => array('collapsible', 'collapsed', 'deviation'))
+		);
+		$fieldset = theme('fieldset', array('element' => $fieldset_element));
+		$AlignResult_tableShuffled = '<div id="scrollWrapperShuffled" class="tab_content">'.$fieldset.theme('table', array('header' => $header, 'rows' => $rowsSuffled, 'attributes' => array('class' => array('result-table-shuffled')))).'</div>';
+	}
+	$tabs = '<ul class="tabs">
+	    		<li><a href="#scrollWrapper">'.t('Algnment Result').'</a></li>
+	    		<li><a href="#scrollWrapperShuffled">'.t('Shuffled Algnment Result').'</a></li>
+				<li><a href="#scrollWrapperGraph">'.t('Algnment Graph').'</a></li>
+			</ul>';
+
+	return $tabs.'<div class="tab_container">'.$AlignResult_table.$AlignResult_tableShuffled.'</div>';
 }
+
+function standard_deviation($aValues, $bSample = false)
+ {
+     $fMean = array_sum($aValues) / count($aValues);
+     $fVariance = 0.0;
+     foreach ($aValues as $i)
+     {
+         $fVariance += pow($i - $fMean, 2);
+     }
+     $fVariance /= ( $bSample ? count($aValues) - 1 : count($aValues) );
+     return (float) sqrt($fVariance);
+ } 
 
 /**
  * Build array for from selects treshold/slice legth ext...

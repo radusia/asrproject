@@ -32,6 +32,16 @@ function asr_archive_menu() {
       'access callback' => TRUE,
   );  
   
+  $items['asr_archive/archive_result_graph/%'] = array(
+  		'type' => MENU_NORMAL_ITEM,
+  		'title' => 'ASR Archive Result Graph',
+  		'description' => 'ASR Archive Result Graph',
+  		'page callback' => 'display_archive_result_graph',
+  		'page arguments' => array(2),
+  		'access callback' => 'user_access',
+  		'access callback' => TRUE,
+  );
+  
   return $items;
 }
 

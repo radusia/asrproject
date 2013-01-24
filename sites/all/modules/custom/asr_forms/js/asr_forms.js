@@ -100,15 +100,23 @@
 			  styled_asr_seq += '<span class="'+class_name+'">'+ASRSequence[index]+'</span>';
 			  styled_sub_seq += '<span class="'+class_name+'">'+GenSubSequence[index]+'</span>';
 		  });
-		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>ASRSequence</td><td colspan="4">'+styled_asr_seq+'</td></tr>');
-		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>&nbsp;</td><td colspan="4">'+lines+'</td></tr>');
-		  jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>GenSubSequence</td><td colspan="4">'+styled_sub_seq+'</td></tr>');
+		  str = '<tr class="collapsedrow"><td colspan="6">';
+		  str += '<div class="scroll_wrapper"><div class="scroll_inner">';
+		  str += '<br />ASRSequence:&nbsp;&nbsp;&nbsp;&nbsp;'+styled_asr_seq;
+		  str += '<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+lines;
+		  str += '<br /><br />GenSubSequence:&nbsp;'+styled_sub_seq+'</div></div></td></tr>';
+		  
+		  jQuery("#"+id).parent().after(str);
+
+		  //jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>ASRSequence</td><td colspan="4">'+styled_asr_seq+'</td></tr>');
+		  //jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>&nbsp;</td><td colspan="4">'+lines+'</td></tr>');
+		  //jQuery("#"+id).parent().after('<tr class="collapsedrow"><td>GenSubSequence</td><td colspan="4">'+styled_sub_seq+'</td></tr>');
 	  }
 	  else {
 		  jQuery("#"+id).addClass('collapsed');
 		  jQuery("#"+id).parent().next().remove();
-		  jQuery("#"+id).parent().next().remove();
-		  jQuery("#"+id).parent().next().remove();
+		  //jQuery("#"+id).parent().next().remove();
+		  //jQuery("#"+id).parent().next().remove();
 	  }
    };
    
@@ -119,10 +127,10 @@
    };
 
    //add sorting to result tables
-   ASR_Forms.tableSorter = function(id) {
-	jQuery(".sticky-enabled").tablesorter({ sortList:[[1,0],[2,0],[3,0]] , headers: { 0: { sorter: false}, 4: {sorter: false} }});
-	jQuery(".header").mouseup(function() { ASR_Forms.initCollapse(); });
-	jQuery('.sticky-enabled > tbody  > tr').each(function(index) {
+   ASR_Forms.tableSorter = function(table) {
+	jQuery("."+table).tablesorter({ sortList:[[1,0],[2,0],[3,0],[4,0]] , headers: { 0: { sorter: false}, 5: {sorter: false} }});
+	jQuery("."+table+" .header").mouseup(function() { ASR_Forms.initCollapse(); });
+	/*jQuery("."+table+" > tbody  > tr").each(function(index) {
 		if(index%2 == 1 && this.hasClass("even")) { //odd
 			this.removeClass("even");
 			this.addClass("odd");
@@ -131,8 +139,30 @@
 			this.removeClass("odd");
 			this.addClass("even");
 		}
-	});
-  };
+	});*/
+   };
+
+   
+	//add tabs to result
+	ASR_Forms.tabsContainer = function() {
+		    //When page loads...
+			jQuery(".tab_content").hide(); //Hide all content
+			jQuery("ul.tabs li:first").addClass("active").show(); //Activate first tab
+			jQuery(".tab_content:first").show(); //Show first tab content
+		
+				 //On Click Event
+			jQuery("ul.tabs li").click(function() {
+		
+			jQuery("ul.tabs li").removeClass("active"); //Remove any "active" class
+			jQuery(this).addClass("active"); //Add "active" class to selected tab
+		    jQuery(".tab_content").hide(); //Hide all tab content
+
+		    var activeTab = jQuery(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
+		    jQuery(activeTab).fadeIn(); //Fade in the active ID content
+		    return false;
+		 });
+
+   };
 
 })(jQuery);
 

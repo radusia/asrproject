@@ -20,28 +20,6 @@
 #edit-alignement-min-local-cost {
 	width: 100px;
 }
-.txt_red {
-	color: red;
-	font-weight: bold;
-}
-.txt_green {
-	color: green;
-	font-weight: bold;
-}
-td.collapsible {
-    background: url("/misc/menu-expanded.png") no-repeat scroll 5px 65% transparent;
-    padding-left: 15px;
-	cursor: pointer;
-}
-td.collapsed {
-    background-image: url("/misc/menu-collapsed.png");
-    background-position: 5px 50%;
-}
-tr.collapsedrow {
-	background-color: #FFFFFF;
-	font-family: Courier, "Courier New", monospace;
-	line-height: 5px;
-}
 .red {
 	color: red;
 }
@@ -75,4 +53,91 @@ th.header {
 }
 #box, #result {
 	width: 100%;
+}
+table.result-table tbody tr {
+	background: none repeat scroll 0 0 rgba(0, 0, 0, 0.063);
+}
+table.result-table-shuffled tbody tr {
+	background: none repeat scroll 0 0 rgba(0, 0, 0, 0.106);
+}
+td.collapsible {
+    background: url("/misc/menu-expanded.png") no-repeat scroll 5px 65% transparent;
+    padding-left: 15px;
+	cursor: pointer;
+}
+td.collapsed {
+    background-image: url("/misc/menu-collapsed.png");
+    background-position: 5px 50%;
+}
+table.result-table-shuffled tbody tr.collapsedrow, table.result-table tbody tr.collapsedrow {
+	background-color: #FFFFFF;
+	font-family: Courier, "Courier New", monospace;
+	line-height: 5px;
+}
+
+
+html.js fieldset.deviation .fieldset-legend {
+    background-image: none;
+}
+
+div.scroll_wrapper {
+	overflow-y: hidden; 
+	overflow-x: scroll;
+	width: 650px; 
+	height:70px
+}
+div.scroll_inner {
+	white-space: nowrap;
+	width: 500%;
+}
+
+/*tabs css*/
+ul.tabs {
+ margin: 0 !important; 
+ padding: 0 !important; 
+ float: left;
+ list-style: none;
+ height: 32px; /*--Set height of tabs--*/
+ border-bottom: 1px solid #CCCCCC;
+ border-left: 1px solid #CCCCCC;
+ width: 100%;	
+}
+ul.tabs li {
+ float: left;
+ margin: 0;
+ padding: 0;
+ height: 31px; /*--Subtract 1px from the height of the unordered list--*/
+ line-height: 31px; /*--Vertically aligns the text within the tab--*/
+ border: 1px solid #CCCCCC;
+ border-left: none;
+ margin-bottom: -1px; /*--Pull the list item down 1px--*/
+ overflow: hidden;
+ position: relative;
+ background: #e0e0e0;
+}
+ul.tabs li a {
+ text-decoration: none;
+ color: #000;
+ display: block;
+ padding: 0 20px;
+ border: 0px solid #fff; /*--Gives the bevel look with a 1px white border inside the list item--*/
+ outline: none;
+}
+ul.tabs li a:hover {
+ background: #ccc;
+}
+html ul.tabs li.active, html ul.tabs li.active a:hover  { /*--Makes sure that the active tab does not listen to the hover properties--*/
+ background: #fff;
+ border-bottom: 1px solid #fff; /*--Makes the active tab look like it's connected with its content--*/
+}
+.tab_container {
+ border: 1px solid #CCCCCC;
+ border-top: none;
+ overflow: hidden;
+ clear: both;
+ float: left; width: 100%;
+ background: #fff;
+}
+.tab_content {
+ padding: 20px;
 }
