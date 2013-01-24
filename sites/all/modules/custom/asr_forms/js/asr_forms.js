@@ -152,7 +152,7 @@
 		
 				 //On Click Event
 			jQuery("ul.tabs li").click(function() {
-		
+
 			jQuery("ul.tabs li").removeClass("active"); //Remove any "active" class
 			jQuery(this).addClass("active"); //Add "active" class to selected tab
 		    jQuery(".tab_content").hide(); //Hide all tab content
@@ -172,3 +172,27 @@ jQuery(document).ready(function() {
 	jQuery("#edit-alignement-organisms").change(function() { ASR_Forms.GetRetrotransposonsList(jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
 	jQuery("#edit-alignement-retrotransposons").change(function() { ASR_Forms.GetRetrotransposonsPortionList(jQuery("#edit-alignement-organisms").val(), jQuery(this).val());  /*alert('you selected ' + jQuery(this).val());*/ });
 });
+
+
+function drawChart() {
+	alert('draw graph');
+	var data = google.visualization.arrayToDataTable([
+	['Score', 'String Offset'],
+	['2004',1000],
+	['2005',1170],
+	['2006',660],
+	['2007',1030]
+	]);
+	
+	var options = {
+	 title: 'Alignment Graph'
+	};
+	
+	var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+	chart.draw(data, options);
+}
+
+function exportTable2Excel(table) {
+	window.open('data:application/vnd.ms-excel,' + encodeURIComponent('<table>'+jQuery('.'+table).html()+'</table>'));
+    e.preventDefault();
+}

@@ -87,6 +87,8 @@ function asr_forms_sequence_alignement_form($form, &$form_state) {
 	drupal_add_js('misc/jquery.tablesorter.js');
 	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
 	drupal_add_js('misc/collapse.js');
+	drupal_add_js('https://www.google.com/jsapi', 'external');
+	drupal_add_js("google.load('visualization', '1', {packages:['corechart']}); ", "inline");	
 	$form['asr_alignement'] = array(
 			'#type' => 'fieldset',
 			'#title' => t('Ancient standard repeats detection in DNA sequence'),
@@ -584,7 +586,7 @@ function asr_forms_wrap_result($result_arr) {
 		$fieldset_str = t('Amount:').count($scores_arr);
 		$fieldset_str .= t(' | Average: ').( array_sum($scores_arr) / count($scores_arr) );
 		$fieldset_str .= t(' | Deviation: ').standard_deviation($scores_arr);
-		
+		$fieldset_str .= '<img src="/sites/default/files/excel.png" class="excel_logo" alt="Export Table to Escel" onclick="exportTable2Excel(\'result-table\')" />';
 		$fieldset_element = array('#title' => $fieldset_str,                      
 				'#children'    => '',
 				'#collapsible' => true,                       
@@ -598,7 +600,7 @@ function asr_forms_wrap_result($result_arr) {
 		$fieldset_str = t('Amount:').count($scores_arrSuffled);
 		$fieldset_str .= t(' | Average: ').( array_sum($scores_arrSuffled) / count($scores_arrSuffled) );
 		$fieldset_str .= t(' | Deviation: ').standard_deviation($scores_arrSuffled);
-		
+		$fieldset_str .= '<img src="/sites/default/files/excel.png" class="excel_logo" alt="Export Table to Escel" onclick="exportTable2Excel(\'result-table-shuffled\')" />';
 		$fieldset_element = array('#title' => $fieldset_str,
 				'#children'    => '',
 				'#collapsible' => true,
@@ -613,8 +615,16 @@ function asr_forms_wrap_result($result_arr) {
 	    		<li><a href="#scrollWrapperShuffled">'.t('Shuffled Algnment Result').'</a></li>
 				<li><a href="#scrollWrapperGraph">'.t('Algnment Graph').'</a></li>
 			</ul>';
+	$GraphResult = "
+<div id='scrollWrapperGraph' class='tab_content'>
+<script type=\"text/javascript\">
+drawChart();
 
-	return $tabs.'<div class="tab_container">'.$AlignResult_table.$AlignResult_tableShuffled.'</div>';
+</script>
+<div id='chart_div' style='width: 900px; height: 500px;'></div>
+</div>";
+	
+	return $tabs.'<div class="tab_container">'.$AlignResult_table.$AlignResult_tableShuffled.$GraphResult.'</div>';
 }
 
 function standard_deviation($aValues, $bSample = false)

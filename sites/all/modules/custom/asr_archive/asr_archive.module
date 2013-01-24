@@ -73,6 +73,8 @@ function asr_archive_search_form($form, &$form_state){
 	drupal_add_js('misc/jquery.tablesorter.js');
 	drupal_add_js(drupal_get_path('module', 'asr_forms').'/js/asr_forms.js');
 	drupal_add_js('misc/collapse.js');
+	drupal_add_js('https://www.google.com/jsapi', 'external');
+	drupal_add_js("google.load('visualization', '1', {packages:['corechart']}); ", "inline");
 	$form['asr_alignement'] = array(
 			'#type' => 'fieldset',
 			'#title' => t('Search Alignment'),
@@ -218,7 +220,8 @@ function asr_archive_submit_driven_callback($form, $form_state) {
    			$rows1 [] = array(
 				array('data' => $row['alignement']),
 				array('data' => $row['tmp']),
-				array('data' => '<input type="button" value="view" class="archiveresult" id = "'.$row['alignement_uid'].'" name = "'.$row['alignement_uid'].'" onclick="ASR_Forms.GetArchiveResult(\''.$row['alignement_uid'].'\')" />'),
+				array('data' => '<img src="/sites/default/files/view.png" class="view_logo" alt="View Results" id = "'.$row['alignement_uid'].'" onclick="ASR_Forms.GetArchiveResult(\''.$row['alignement_uid'].'\')" />'),
+				/*<input type="button" value="view" class="archiveresult" id = "'.$row['alignement_uid'].'" name = "'.$row['alignement_uid'].'" onclick="ASR_Forms.GetArchiveResult(\''.$row['alignement_uid'].'\')" />'),*/
 			);
 		
    			$result_table = theme('table', array('header' => $header1, 'rows' => $rows1));
