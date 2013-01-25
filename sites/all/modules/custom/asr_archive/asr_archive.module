@@ -128,7 +128,10 @@ function asr_archive_search_form($form, &$form_state){
     ),
     '#value' => t('Search'),
   );
-  	
+  $form['asr_alignement']['loading-small'] = array(
+  		'#markup' => "<div class='loading_small'><div class='ajax-progress'><div class='throbber'></div>".t('Please wait...')."</div></div>",
+  );
+  
 	$form['result'] = array(
 			'#type' => 'fieldset',
 			'#prefix' => '<div id="box" style="display:none;">',

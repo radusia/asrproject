@@ -91,15 +91,16 @@ div.scroll_inner {
 	width: 500%;
 }
  
-img.excel_logo {
+.excel_logo {
 	float: right;
 	cursor: pointer;
 	padding: 5px;
 }
-img.view_logo {
+.view_logo {
 	cursor: pointer;
 	padding: 5px;
 }
+
 /*tabs css*/
 ul.tabs {
  margin: 0 !important; 

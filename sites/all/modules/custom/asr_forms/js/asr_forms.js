@@ -62,6 +62,7 @@
   //ajax request to fill relevant list
   //Archive result
   ASR_Forms.GetArchiveResult = function(id) {
+	  $('#result').html(jQuery(".loading_small").html());
 	  $('#result').load('/asr_archive/archive_result/'+id, function() {
 		  //alert('Load was performed.');
 	  });
@@ -175,7 +176,7 @@ jQuery(document).ready(function() {
 
 
 function drawChart() {
-	alert('draw graph');
+	//alert('draw graph');
 	var data = google.visualization.arrayToDataTable([
 	['Score', 'String Offset'],
 	['2004',1000],

@@ -502,10 +502,11 @@ function asr_forms_alignement_result($result_arr) {
  */
 function asr_forms_wrap_result($result_arr) {		
 	$AlignResult_table = $AlignResult_tableShuffled = '';
-	$count = $countShuffled = 0;
+	$count = $countSuffled = 0;
 	$header = array();
 	$rows = $rowsShuffled = array();
     $scores_arr = $scores_arrShuffled = array();
+    $tabs = $GraphResult = '';
     
 	$header = array(
 			array('data' => t('Repeat Name')),
@@ -583,9 +584,9 @@ function asr_forms_wrap_result($result_arr) {
 	}	
 
 	if(!empty($rows)) {
-		$fieldset_str = t('Amount:').count($scores_arr);
-		$fieldset_str .= t(' | Average: ').( array_sum($scores_arr) / count($scores_arr) );
-		$fieldset_str .= t(' | Deviation: ').standard_deviation($scores_arr);
+		$fieldset_str = t('Amount of Results:').count($scores_arr);
+		$fieldset_str .= t(' | Average Score: ').( array_sum($scores_arr) / count($scores_arr) );
+		$fieldset_str .= t(' | Score Deviation: ').standard_deviation($scores_arr);
 		$fieldset_str .= '<img src="/sites/default/files/excel.png" class="excel_logo" alt="Export Table to Escel" onclick="exportTable2Excel(\'result-table\')" />';
 		$fieldset_element = array('#title' => $fieldset_str,                      
 				'#children'    => '',
@@ -595,11 +596,21 @@ function asr_forms_wrap_result($result_arr) {
 		);  
 		$fieldset = theme('fieldset', array('element' => $fieldset_element));
 		$AlignResult_table = '<div id="scrollWrapper" class="tab_content">'.$fieldset.theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('result-table')))).'</div>';
+		$tabs .= '<li><a href="#scrollWrapper">'.t('Algnment Result').'</a></li>';
+		$tabs .= '<li><a href="#scrollWrapperGraph">'.t('Algnment Graph').'</a></li>';
+		$GraphResult = "
+		<div id='scrollWrapperGraph' class='tab_content'>
+		<script type=\"text/javascript\">
+		drawChart();
+			
+		</script>
+		<div id='chart_div' style='width: 900px; height: 500px;'></div>
+		</div>";
 	}
 	if(!empty($rowsSuffled)) {
-		$fieldset_str = t('Amount:').count($scores_arrSuffled);
-		$fieldset_str .= t(' | Average: ').( array_sum($scores_arrSuffled) / count($scores_arrSuffled) );
-		$fieldset_str .= t(' | Deviation: ').standard_deviation($scores_arrSuffled);
+		$fieldset_str = t('Amount of Results:').count($scores_arrSuffled);
+		$fieldset_str .= t(' | Average Score: ').( array_sum($scores_arrSuffled) / count($scores_arrSuffled) );
+		$fieldset_str .= t(' | Score Deviation: ').standard_deviation($scores_arrSuffled);
 		$fieldset_str .= '<img src="/sites/default/files/excel.png" class="excel_logo" alt="Export Table to Escel" onclick="exportTable2Excel(\'result-table-shuffled\')" />';
 		$fieldset_element = array('#title' => $fieldset_str,
 				'#children'    => '',
@@ -609,22 +620,14 @@ function asr_forms_wrap_result($result_arr) {
 		);
 		$fieldset = theme('fieldset', array('element' => $fieldset_element));
 		$AlignResult_tableShuffled = '<div id="scrollWrapperShuffled" class="tab_content">'.$fieldset.theme('table', array('header' => $header, 'rows' => $rowsSuffled, 'attributes' => array('class' => array('result-table-shuffled')))).'</div>';
+		$tabs .= '<li><a href="#scrollWrapperShuffled">'.t('Shuffled Algnment Result').'</a></li>';
 	}
-	$tabs = '<ul class="tabs">
-	    		<li><a href="#scrollWrapper">'.t('Algnment Result').'</a></li>
-	    		<li><a href="#scrollWrapperShuffled">'.t('Shuffled Algnment Result').'</a></li>
-				<li><a href="#scrollWrapperGraph">'.t('Algnment Graph').'</a></li>
-			</ul>';
-	$GraphResult = "
-<div id='scrollWrapperGraph' class='tab_content'>
-<script type=\"text/javascript\">
-drawChart();
-
-</script>
-<div id='chart_div' style='width: 900px; height: 500px;'></div>
-</div>";
-	
-	return $tabs.'<div class="tab_container">'.$AlignResult_table.$AlignResult_tableShuffled.$GraphResult.'</div>';
+	if(!empty($tabs)) {
+		$tabs = '<ul class="tabs">'.$tabs.'</ul>';
+		$tables = '<div class="tab_container">'.$AlignResult_table.$AlignResult_tableShuffled.$GraphResult.'</div>';
+		return $tabs.$tables;
+	}	
+	return '';
 }
 
 function standard_deviation($aValues, $bSample = false)
