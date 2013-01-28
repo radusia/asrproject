@@ -175,21 +175,20 @@ jQuery(document).ready(function() {
 });
 
 
-function drawChart() {
-	//alert('draw graph');
-	var data = google.visualization.arrayToDataTable([
-	['Score', 'String Offset'],
-	['2004',1000],
-	['2005',1170],
-	['2006',660],
-	['2007',1030]
-	]);
-	
+function drawChart(divId, data, title) {
+	//alert(data.toSource());
+	var data = google.visualization.arrayToDataTable(data);
+
 	var options = {
-	 title: 'Alignment Graph'
-	};
+	 title: title,
+	 //colors: [color],
+	 hAxis: {title: 'Scores',  titleTextStyle: {color: 'green'}},
+	 vAxis: {title: '% Dist. of Scores',  minValue: 0, titleTextStyle: {color: 'green'}},
+	}
 	
-	var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+	//var chart = new google.visualization.LineChart(document.getElementById(divId));
+	//var chart = new google.visualization.AreaChart(document.getElementById(divId));
+	var chart = new google.visualization.ColumnChart(document.getElementById(divId));
 	chart.draw(data, options);
 }
 

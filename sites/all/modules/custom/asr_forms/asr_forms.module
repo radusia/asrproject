@@ -474,6 +474,7 @@ function asr_forms_error_script($error = '', $field = '') {
  */
 function asr_forms_alignement_result($result_arr) {
 	$out = ''; 
+	
 	/*foreach($result_arr as $key => $result) {
 		if(isset($result->ASRAlignResult->RetrotransposonsPortionAlignResult)) {
 			$list = $result->ASRAlignResult->RetrotransposonsPortionAlignResult;
@@ -505,8 +506,9 @@ function asr_forms_wrap_result($result_arr) {
 	$count = $countSuffled = 0;
 	$header = array();
 	$rows = $rowsShuffled = array();
-    $scores_arr = $scores_arrShuffled = array();
+    $scores_arr = $scores_arrShuffled = $graph_title = array();
     $tabs = $GraphResult = '';
+    $score_values_count = $score_values_countShuffled = array();
     
 	$header = array(
 			array('data' => t('Repeat Name')),
@@ -548,6 +550,12 @@ function asr_forms_wrap_result($result_arr) {
 						);
 						$count++;
 						$scores_arr[] = $value1->LocalAlignmentResult->Score;
+						if (!isset($score_values_count[$value1->LocalAlignmentResult->Score])) {
+								$score_values_count[$value1->LocalAlignmentResult->Score] = 1;
+						}
+						else {
+							$score_values_count[$value1->LocalAlignmentResult->Score]++;
+						}
 					}
 				}
 				
@@ -575,6 +583,12 @@ function asr_forms_wrap_result($result_arr) {
 						);
 						$countSuffled++;
 						$scores_arrSuffled[] = $value2->LocalAlignmentResult->Score;
+						if (!isset($score_values_countShuffled[$value2->LocalAlignmentResult->Score])) {
+							$score_values_countShuffled[$value2->LocalAlignmentResult->Score] = 1;
+						}
+						else {
+							$score_values_countShuffled[$value2->LocalAlignmentResult->Score]++;
+						}
 					}
 				}
 			
@@ -584,9 +598,12 @@ function asr_forms_wrap_result($result_arr) {
 	}	
 
 	if(!empty($rows)) {
+		$average = round(array_sum($scores_arr) / count($scores_arr), 5);
+		$deviation = round(standard_deviation($scores_arr), 5);
+		$amount = count($scores_arr);
 		$fieldset_str = t('Amount of Results:').count($scores_arr);
-		$fieldset_str .= t(' | Average Score: ').( array_sum($scores_arr) / count($scores_arr) );
-		$fieldset_str .= t(' | Score Deviation: ').standard_deviation($scores_arr);
+		$fieldset_str .= t(' | Average Score: ').$average;
+		$fieldset_str .= t(' | Score Deviation: ').$deviation;
 		$fieldset_str .= '<img src="/sites/default/files/excel.png" class="excel_logo" alt="Export Table to Escel" onclick="exportTable2Excel(\'result-table\')" />';
 		$fieldset_element = array('#title' => $fieldset_str,                      
 				'#children'    => '',
@@ -597,20 +614,45 @@ function asr_forms_wrap_result($result_arr) {
 		$fieldset = theme('fieldset', array('element' => $fieldset_element));
 		$AlignResult_table = '<div id="scrollWrapper" class="tab_content">'.$fieldset.theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('result-table')))).'</div>';
 		$tabs .= '<li><a href="#scrollWrapper">'.t('Algnment Result').'</a></li>';
-		$tabs .= '<li><a href="#scrollWrapperGraph">'.t('Algnment Graph').'</a></li>';
-		$GraphResult = "
-		<div id='scrollWrapperGraph' class='tab_content'>
+		//$distributionObj = "";
+		$graph_title[] = 'Score Average: '.$average;
+		$graph_title[] = 'Score Deviation: '.$deviation;
+		$distributionArr = array();
+		$min = min($scores_arr);
+		$max = max($scores_arr);
+		for($i=$min; $i<=$max; $i++) {
+			$distValue = isset($score_values_count[$i])?$score_values_count[$i]:0;
+			$distValue = $distValue/$amount*100;
+			$distributionArr[$i] = $distValue;
+			//$distributionObj .= "['".$i."', ".$distValue."],
+			//		";
+		}
+		/*if(!empty($distributionObj)){
+			$distributionObj = "[
+								['Score', 'Score Distribution'],
+								".$distributionObj."
+								]";
+		}*/
+		/*$test = "[
+	['Score', '%'],
+	['2004',1000],
+	['2005',1170],
+	['2006',660],
+	['2007',1030]
+	]";*/
+		/*$GraphResult .= "
 		<script type=\"text/javascript\">
-		drawChart();
-			
+		drawChart('chart_div', ".$distributionObj.",'Alignment Score Distribution Graph', ".$average.",".$deviation.", 'blue');			
 		</script>
-		<div id='chart_div' style='width: 900px; height: 500px;'></div>
-		</div>";
+		<div id='chart_div' style='width: 900px; height: 500px;'></div>";*/
 	}
 	if(!empty($rowsSuffled)) {
-		$fieldset_str = t('Amount of Results:').count($scores_arrSuffled);
-		$fieldset_str .= t(' | Average Score: ').( array_sum($scores_arrSuffled) / count($scores_arrSuffled) );
-		$fieldset_str .= t(' | Score Deviation: ').standard_deviation($scores_arrSuffled);
+		$averageShuffled = round(array_sum($scores_arrSuffled) / count($scores_arrSuffled), 5);
+		$deviationShuffled = round(standard_deviation($scores_arrSuffled), 5);
+		$amountShuffled = count($scores_arrSuffled);
+		$fieldset_str = t('Amount of Results:').$amountShuffled;
+		$fieldset_str .= t(' | Average Score: ').$averageShuffled;
+		$fieldset_str .= t(' | Score Deviation: ').$deviationShuffled;
 		$fieldset_str .= '<img src="/sites/default/files/excel.png" class="excel_logo" alt="Export Table to Escel" onclick="exportTable2Excel(\'result-table-shuffled\')" />';
 		$fieldset_element = array('#title' => $fieldset_str,
 				'#children'    => '',
@@ -621,6 +663,63 @@ function asr_forms_wrap_result($result_arr) {
 		$fieldset = theme('fieldset', array('element' => $fieldset_element));
 		$AlignResult_tableShuffled = '<div id="scrollWrapperShuffled" class="tab_content">'.$fieldset.theme('table', array('header' => $header, 'rows' => $rowsSuffled, 'attributes' => array('class' => array('result-table-shuffled')))).'</div>';
 		$tabs .= '<li><a href="#scrollWrapperShuffled">'.t('Shuffled Algnment Result').'</a></li>';
+		//$distributionObjShuffled = "";
+		$graph_title[] = 'Shuffled Score Average: '.$averageShuffled;
+		$graph_title[] = 'Shuffled Score Deviation: '.$deviationShuffled;
+		$distributionArrShuffled = array();
+		
+		if(isset($min))
+			$min = min(array(min($scores_arrSuffled), $min));
+		else $min = min($scores_arrSuffled);
+		if(isset($max))
+			$max = min(array(max($scores_arrSuffled), $max));
+		else $max = max($scores_arrSuffled);
+		
+		for($i=$min; $i<=$max; $i++) {
+			$distValue = isset($score_values_countShuffled[$i])?$score_values_countShuffled[$i]:0;
+			$distValue = $distValue/$amountShuffled*100;
+			$distributionArrShuffled[$i] = $distValue;
+			//$distributionObjShuffled .= "['".$i."', ".$distValue."],
+			//		";
+		}
+		/*if(!empty($distributionObjShuffled)){
+			$distributionObjShuffled = "[
+								['Score', 'Score Distribution'],
+								".$distributionObjShuffled."
+								]";
+		}*/
+		/*$test = "[
+		 ['Score', '%'],
+		['2004',1000],
+		['2005',1170],
+		['2006',660],
+		['2007',1030]
+		]";*/
+		/*$GraphResult .= "		
+		<script type=\"text/javascript\">
+		drawChart('chart_divShuffled', ".$distributionObjShuffled.",'Shuffled Alignment Score Distribution Graph', ".$averageShuffled.",".$deviationShuffled.", 'green');
+		</script>
+		<div id='chart_divShuffled' style='width: 900px; height: 500px;'></div>";*/
+	}
+	if(!empty($distributionArr) || !empty($distributionArrShuffled)) {
+		$distributionObj = "";
+		for($i=$min; $i<=$max; $i++) {
+			$distributionObj .= "['".$i."', ".(isset($distributionArr[$i])?$distributionArr[$i]:0).", ".(isset($distributionArrShuffled[$i])?$distributionArrShuffled[$i]:0)."],
+					";
+		}
+		if(!empty($distributionObj)){
+			$distributionObj = "[
+								['Score', 'Alignment Score Distribution', 'Shuffled Alignment Score Distribution'],
+								".$distributionObj."
+								]";
+		}
+		$GraphResult .= "
+		<script type=\"text/javascript\">
+		drawChart('chart_div', ".$distributionObj.",'Alignment Score Distribution Graph (".implode(", ", $graph_title).")');
+		</script>
+		<div id='chart_div' style='width: 900px; height: 500px;'></div>";
+		$tabs .= '<li><a href="#scrollWrapperGraph">'.t('Algnment Graph').'</a></li>';
+		$GraphResult = "<div id='scrollWrapperGraph' class='tab_content'>".$GraphResult."</div>";
 	}
 	if(!empty($tabs)) {
 		$tabs = '<ul class="tabs">'.$tabs.'</ul>';

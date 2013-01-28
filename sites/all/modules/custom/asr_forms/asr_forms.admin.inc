@@ -62,5 +62,16 @@ function asr_forms_admin_settings_form($form, &$form_state) {
  			'#default_value' => ASR_FORMS_COST_GAP_MAX,
  	);
  	
+ 	$form['chunk_settings'] = array(
+ 			'#type' => 'fieldset',
+ 			'#title' => t('Alignment Sequence Chunk Length'),
+ 			'#description' => t('Define length of each chunk to be aligned in algorithm per request.'),
+ 	);
+ 	$form['chunk_settings']['sequence_chunk_length'] = array(
+ 			'#type' => 'textfield',
+ 			'#title' => t('Sequence chunk length'),
+ 			'#default_value' => ASR_FORMS_CHUNK_LENGTH,
+ 	);
+ 	
  	return system_settings_form($form);
 }
