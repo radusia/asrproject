@@ -143,11 +143,11 @@ function _output_json_response($out, $callbackError='') {
  *
  * @return $out - json response
  */
-function GetOrganismList(){
+function GetOrganismList($json = true){
 
 	$var_key = 'GetOrganismList';
 	
-	if(variable_get($var_key, null) != null) {
+	if(variable_get($var_key, null) != null && $json) {
 		_output_json_response(variable_get($var_key, null));
 		return;
 	}
@@ -171,7 +171,9 @@ function GetOrganismList(){
 	}
 	unset($response);
 	variable_set($var_key, $out);
-	_output_json_response($out);
+	if($json)
+		_output_json_response($out);
+	else return $out;
 }
 
 /**
@@ -180,12 +182,12 @@ function GetOrganismList(){
 *
 * @return $out - json response
 */
-function GetRetrotransposonsList(){
+function GetRetrotransposonsList($json = true){
 	$OrganismId = strip_tags(isset($_POST["OrganismId"]) ? $_POST["OrganismId"] : 1);
 
 	$var_key = 'GetRetrotransposonsList_oid'.$OrganismId;
 	
-	if(variable_get($var_key, null) != null) {
+	if(variable_get($var_key, null) != null && $json) {
 		_output_json_response(variable_get($var_key, null));
 		return;
 	}
@@ -210,7 +212,9 @@ function GetRetrotransposonsList(){
 	}
 	unset($response);
 	variable_set($var_key, $out);
-	_output_json_response($out);
+	if($json)
+		_output_json_response($out);
+	else return $out;
 }
 
 /**
@@ -219,13 +223,13 @@ function GetRetrotransposonsList(){
  *
  * @return $out - json response
  */
-function GetRetrotransposonsPortionList(){
+function GetRetrotransposonsPortionList($json = true){
 	$OrganismId = strip_tags(isset($_POST["OrganismId"]) ? $_POST["OrganismId"] : 1);
 	$RetrotransposonsId = strip_tags(isset($_POST["RetrotransposonsId"]) ? $_POST["RetrotransposonsId"] : 1);
 	
 	$var_key = 'GetRetrotransposonsPortionList_oid'.$OrganismId.'_rid'.$RetrotransposonsId;
 	
-	if(variable_get($var_key, null) != null) {
+	if(variable_get($var_key, null) != null && $json) {
 		_output_json_response(variable_get($var_key, null));
 		return;
 	}
@@ -249,7 +253,9 @@ function GetRetrotransposonsPortionList(){
 	}
 	unset($response);
 	variable_set($var_key, $out);
-	_output_json_response($out);
+	if($json)
+		_output_json_response($out);
+	else return $out;
 }
 
 /**
@@ -272,9 +278,12 @@ function DoASRAlign($alignement_string, $form_values, $chunk_offset, $alignement
 	$CheckResultWithShuffeledSequence = !empty($form_values['alignement_options']['alignement_shuffeled_sequence']) ? 'true' : 'false';
 	$RemoveNonOverlapRepeatMatch = !empty($form_values['alignement_options']['alignement_non_overlap']) ? 'true' : 'false';
 	$ReturnOnlyLocalAlignOk = !empty($form_values['alignement_options']['alignement_align_ok']) ? 'true' : 'false';
+	$algnement_name = $form_values['algnement_name'];
 	
 	$params =array('input' => array('NewSequence' => $NewSequence,
 			'ChunkOffset' => $chunk_offset,
+			'BatchId' => $alignement_uid,
+			'AlignmentName' => $algnement_name,
 			'OrganismId' => $OrganismId,
 			'RetrotransposonsId' => $RetrotransposonsId,
 			'OrganismRetrotransposonsDelimitedList' => $RetrotransposonsPortionList,
@@ -286,6 +295,7 @@ function DoASRAlign($alignement_string, $form_values, $chunk_offset, $alignement
 									'WordMatchPercentage' => $WordMatchPercentage),
 			'RemoveNonOverlapRepeatMatch' => $RemoveNonOverlapRepeatMatch,
 			'ReturnOnlyLocalAlignOk' => $ReturnOnlyLocalAlignOk));
+
 	try {
 		$response = asr_api_service_call('DoASRAlignAlternate', $params);
 	}catch (Exception $e){
@@ -301,8 +311,7 @@ function DoASRAlign($alignement_string, $form_values, $chunk_offset, $alignement
 	global $user;
 	if(module_exists("asr_archive")) {
 	    $out_res = base64_encode(gzcompress(serialize($out)));
-	    $user_id = $user->uid;
-	    $algnement_name = $form_values['algnement_name'];
+	    $user_id = $user->uid;	    
 	    $sql = 'INSERT INTO asr_archive (alignement, userid, alignement_uid, chunk_offset, result) VALUES(\''.$algnement_name.'\','.$user_id.',\''.$alignement_uid.'\', '.$chunk_offset.', \''.$out_res.'\')';
 	    db_query($sql);
 	}

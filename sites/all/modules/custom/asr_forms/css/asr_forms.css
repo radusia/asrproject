@@ -83,7 +83,7 @@ html.js fieldset.deviation .fieldset-legend {
 div.scroll_wrapper {
 	overflow-y: hidden; 
 	overflow-x: scroll;
-	width: 650px; 
+	width: 800px; 
 	height:70px
 }
 div.scroll_inner {

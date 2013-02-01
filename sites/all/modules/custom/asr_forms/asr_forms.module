@@ -704,7 +704,7 @@ function asr_forms_wrap_result($result_arr) {
 	if(!empty($distributionArr) || !empty($distributionArrShuffled)) {
 		$distributionObj = "";
 		for($i=$min; $i<=$max; $i++) {
-			$distributionObj .= "['".$i."', ".(isset($distributionArr[$i])?$distributionArr[$i]:0).", ".(isset($distributionArrShuffled[$i])?$distributionArrShuffled[$i]:0)."],
+			$distributionObj .= "['".$i."', ".(isset($distributionArr[$i])?round($distributionArr[$i], 3):0).", ".(isset($distributionArrShuffled[$i])?round($distributionArrShuffled[$i], 3):0)."],
 					";
 		}
 		if(!empty($distributionObj)){

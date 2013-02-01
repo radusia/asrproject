@@ -1,0 +1,8 @@
+name = ASR tests
+description = Module to run tests for ancient standard repeats detection in DNA sequence
+package = ASR project
+core = 7.x
+php = 5.3
+
+files[] = asr_tests.module
+dependencies[] = asr_api

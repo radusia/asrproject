@@ -1,0 +1,86 @@
+<?php
+/**
+ * Implementation of hook_menu().
+ */
+function asr_tests_menu() {
+  
+  $items = array(); 
+  $items['asr_tests/process/%'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'ASR Process',
+  	'description' => 'ASR Process for running tests',
+  	'page callback' => 'asr_tests_process_alignment',
+  	'page arguments' => array(2),
+  	'access callback' => 'user_access',
+    'access callback' => TRUE,
+  );
+  
+  return $items;
+}
+
+/**
+ * Get all chunks of archived data by alignement_uid
+ * And return HTML of result in table
+ * @param int alignement_uid 
+ * 
+ * @return string  - html result from theme()
+ */
+function asr_tests_process_alignment($arg){
+  $string = remove_break_lines(file_get_contents(drupal_get_path('module', 'asr_tests')."/dna_seq/hgc_1M.txt"));
+  $string_chunks_arr = chunk_string_to_array($string, ASR_FORMS_CHUNK_LENGTH);
+  $alignement_uid =  generate_uuid();
+
+  $mod = strip_tags(isset($arg) ? $arg : 0);
+  $OrganizmList = variable_get('OrganizmList', '');
+  if(empty($OrganizmList)) {
+  	$OrganizmList = GetOrganismList(false);
+  	variable_set('OrganizmList', $OrganizmList);
+  }
+  //echo "<pre>";
+  //print_r($OrganizmList);
+  foreach($OrganizmList->list as $key => $value) {
+  	if($key%100 == $mod) {
+  		//echo "<pre>";
+  		//print_r($value);
+  		$_POST["OrganismId"] = $value->Id;
+  		$RetrotransposonsList = GetRetrotransposonsList(false);
+  		foreach($RetrotransposonsList->list as $key1 => $value1) {
+  			//echo "<pre>";
+  			$_POST["RetrotransposonsId"] = $value1->Id;
+  			$RetrotransposonsPortionList = GetRetrotransposonsPortionList(false);
+  			foreach($RetrotransposonsPortionList->list as $key2 => $value2) {
+  				//echo "<pre>";
+  				//print_r($value2);
+  				
+  				/*Generate request for alignment*/
+  				$form_values = array();
+  				$form_values['alignement_organisms'] = $_POST["OrganismId"];
+  				$form_values['alignement_retrotransposons'] = $_POST["RetrotransposonsId"];
+  				$form_values['alignement_retrotransposons_portion'] = array($value2->Id);
+  				$form_values['alignement_segment_length'] = 3;
+  				$form_values['alignement_threshold'] = 30;
+  				$form_values['alignement_extension_cost'] = -1;
+  				$form_values['alignement_open_cost'] = -1;
+  				$form_values['alignement_min_local_cost'] = 100;
+				$form_values['alignement_options']['alignement_shuffeled_sequence'] = 1;
+  				$form_values['alignement_options']['alignement_non_overlap'] = '';
+  				$form_values['alignement_options']['alignement_align_ok'] = 1;
+  				$form_values['algnement_name'] = 'ecoli_'.str_replace(array(" ", "/"), "_", ($value->Name)."_".($value1->Name)."_".($value2->Name)).'_3_30_100';
+  				
+  				foreach($string_chunks_arr as $key => $value) {
+  					if(!empty($value)) {
+  						$chunk_offset = ASR_FORMS_CHUNK_LENGTH*$key;
+  						$result = DoASRAlign($value, $form_values, $chunk_offset, $alignement_uid);
+  						if(isset($result->Error) && $result->Error == 'NoError') {
+  							echo "Finished running alignment: ".$form_values['algnement_name'].", Chunk Offset: ".$chunk_offset."<br />";
+  						}
+  						else {
+  							echo "Failed to run alignment: ".$form_values['algnement_name'].", Chunk Offset: ".$chunk_offset.", Error: ".(isset($result->RefNumber)?$result->RefNumber:'NA')."<br />";
+  						}
+  					}
+  				}
+  			}
+  		}
+  	}
+  }
+}
