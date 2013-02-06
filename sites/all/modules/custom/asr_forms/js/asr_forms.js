@@ -176,7 +176,7 @@ jQuery(document).ready(function() {
 
 
 function drawChart(divId, data, title) {
-	alert(data.toSource());
+//	alert(data.toSource());
 	var data = google.visualization.arrayToDataTable(data);
 
 	var options = {
