@@ -20,7 +20,7 @@ function asr_archive_menu() {
   	'page callback' => 'drupal_get_form',
   	'page arguments' => array('asr_archive_search_form'),
   	'access callback' => 'user_access',
-    'access callback' => TRUE,
+    'access callback' => array('edit asr forms'),
   );
   $items['asr_archive/archive_result/%'] = array(
       'type' => MENU_NORMAL_ITEM,
@@ -29,7 +29,7 @@ function asr_archive_menu() {
       'page callback' => 'display_archive_result',
       'page arguments' => array(2),
       'access callback' => 'user_access',
-      'access callback' => TRUE,
+      'access callback' => array('edit asr forms'),
   );  
   
   $items['asr_archive/archive_result_graph/%'] = array(
@@ -39,7 +39,7 @@ function asr_archive_menu() {
   		'page callback' => 'display_archive_result_graph',
   		'page arguments' => array(2),
   		'access callback' => 'user_access',
-  		'access callback' => TRUE,
+  		'access callback' => array('edit asr forms'),
   );
   
   return $items;
