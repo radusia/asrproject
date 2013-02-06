@@ -39,7 +39,7 @@ function asr_tests_process_alignment($arg){
   //echo "<pre>";
   //print_r($OrganizmList);
   foreach($OrganizmList->list as $key => $value) {
-  	if($key%100 == $mod) {
+  	if(($key%100 == $mod) && ($value->Id > 2)) {
   		//echo "<pre>";
   		//print_r($value);
   		$_POST["OrganismId"] = $value->Id;
